@@ -228,4 +228,142 @@
 
         function renderTransactions() {
             const txCont = document.getElementById('transactions-container');
-            const inxCont = document.getElementById('inbox
+            const inxCont = document.getElementById('inbox-container');
+            const badge = document.getElementById('inbox-badge');
+            
+            txCont.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>';
+            inxCont.innerHTML = '';
+            let inboxCount = 0;
+
+            if (globalTransactions.length === 0) {
+                txCont.innerHTML += `<div class="bg-gray-800/50 rounded-2xl p-4 text-center text-gray-500 text-sm">Немає транзакцій.</div>`;
+                return;
+            }
+
+            globalTransactions.forEach(tx => {
+                const isExpense = tx.type === 'Expense';
+                const sign = isExpense ? '-' : '+';
+                const color = isExpense ? 'text-gray-100' : 'text-green-400';
+                const isInbox = tx.category === 'Нерозподілене' || tx.category === '⚠️ Очікує конвертації';
+                
+                const html = `
+                <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border border-gray-800 ${isInbox ? 'active:bg-gray-700 cursor-pointer border-yellow-600/30' : ''}" 
+                     ${isInbox ? `onclick="openEdit('${tx.id}')"` : ''}>
+                    <div>
+                        <p class="font-medium text-gray-200">${tx.description || tx.category}</p>
+                        <p class="text-xs ${isInbox ? 'text-yellow-500' : 'text-gray-500'} mt-1">${tx.category} • ${tx.date}</p>
+                    </div>
+                    <p class="font-bold ${color}">${sign}${parseFloat(tx.amount).toFixed(2)}</p>
+                </div>`;
+                
+                if (isInbox) {
+                    inxCont.innerHTML += html;
+                    inboxCount++;
+                } else {
+                    txCont.innerHTML += html;
+                }
+            });
+
+            if (inboxCount > 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+                inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
+            }
+        }
+
+        // Add Modal Logic
+        const addModal = document.getElementById('add-modal');
+        let currentTxType = 'Expense';
+        document.getElementById('btn-add-modal').onclick = () => addModal.classList.remove('hidden');
+        
+        document.querySelectorAll('.tx-type-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                document.querySelectorAll('.tx-type-btn').forEach(b => { b.classList.replace('bg-gray-700', 'text-gray-400'); b.classList.remove('text-white', 'shadow'); });
+                e.target.classList.replace('text-gray-400', 'bg-gray-700'); e.target.classList.add('text-white', 'shadow');
+                currentTxType = e.target.textContent === 'Витрата' ? 'Expense' : 'Income';
+            };
+        });
+
+        // Offline Queue Process
+        async function processOfflineQueue() {
+            let queue = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
+            if (queue.length === 0) return;
+            let remainingQueue = [];
+            for (let i = 0; i < queue.length; i++) {
+                try {
+                    const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(queue[i]) });
+                    if ((await res.json()).status !== "success") remainingQueue.push(queue[i]);
+                } catch { remainingQueue.push(queue[i]); break; }
+            }
+            localStorage.setItem('offlineTxQueue', JSON.stringify(remainingQueue));
+            if (remainingQueue.length < queue.length) syncData();
+        }
+        window.addEventListener('online', processOfflineQueue);
+
+        // Submit New Transaction
+        document.getElementById('btn-submit-tx').onclick = async () => {
+            const payload = {
+                source: "pwa", type: currentTxType, date: new Date().toISOString(),
+                amount: document.getElementById('input-amount').value,
+                accountFrom: currentTxType === 'Expense' ? document.getElementById('input-account').value : "",
+                accountTo: currentTxType === 'Income' ? document.getElementById('input-account').value : "",
+                category: document.getElementById('input-category').value,
+                description: document.getElementById('input-desc').value
+            };
+            if (!payload.amount || payload.amount <= 0) return alert("Введіть суму");
+            document.getElementById('btn-submit-tx').disabled = true;
+            
+            if (!navigator.onLine) {
+                let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
+                q.push(payload); localStorage.setItem('offlineTxQueue', JSON.stringify(q));
+                addModal.classList.add('hidden');
+                document.getElementById('btn-submit-tx').disabled = false;
+                return syncData(); // render queue visually later
+            }
+            try {
+                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                addModal.classList.add('hidden');
+                document.getElementById('input-amount').value = ''; document.getElementById('input-desc').value = '';
+                syncData();
+            } finally { document.getElementById('btn-submit-tx').disabled = false; }
+        };
+
+        // Inbox Edit Logic
+        const editModal = document.getElementById('edit-modal');
+        function openEdit(id) {
+            const tx = globalTransactions.find(t => t.id === id);
+            if(!tx) return;
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-desc').value = tx.description;
+            document.getElementById('edit-amount').value = tx.amount > 0 ? tx.amount : '';
+            editModal.classList.remove('hidden');
+        }
+
+        document.getElementById('btn-submit-edit').onclick = async () => {
+            if (!navigator.onLine) return alert("Редагування Inbox можливе тільки онлайн.");
+            
+            const btn = document.getElementById('btn-submit-edit');
+            const id = document.getElementById('edit-id').value;
+            const amount = document.getElementById('edit-amount').value;
+            const cat = document.getElementById('edit-category').value;
+            const desc = document.getElementById('edit-desc').value;
+
+            if (!amount || amount <= 0) return alert("Введіть коректну суму в PLN");
+            btn.textContent = "Збереження..."; btn.disabled = true;
+
+            const payload = { action: "edit", id: id, amount: amount, category: cat, description: desc };
+
+            try {
+                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await res.json();
+                if (result.status === "success") {
+                    editModal.classList.add('hidden');
+                    syncData();
+                } else alert("Помилка: " + result.message);
+            } catch (err) { alert("Помилка мережі"); } 
+            finally { btn.textContent = "Оновити транзакцію"; btn.disabled = false; }
+        };
+    </script>
+</body>
+</html>
