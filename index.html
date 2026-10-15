@@ -5,172 +5,156 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#020617">
+    <meta name="theme-color" content="#0b0e14">
     <title>Finance Tracker</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: { colors: { sumbg: '#0b0e14', sumcard: '#151923', sumblue: '#2d63f5', sumtext: '#7a8294' } } } };</script>
     <style>
         .safe-pt { padding-top: max(2.5rem, env(safe-area-inset-top)); }
         .safe-pb { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
-        .glass-card { background: linear-gradient(145deg, rgba(30,41,59,0.7) 0%, rgba(15,23,42,0.8) 100%); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 30px rgba(0,0,0,0.3); }
-        .glass-nav { background: rgba(2,6,23,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.05); }
-        .glow-btn { box-shadow: 0 0 20px rgba(59,130,246,0.5); }
-        body { background: radial-gradient(circle at top left, #0f172a, #020617 80%); min-height: 100vh; }
+        body { background-color: #0b0e14; color: #ffffff; }
     </style>
 </head>
-
-<body class="text-slate-100 font-sans antialiased select-none touch-manipulation">
-    <!-- Auth Screen -->
-    <div id="auth-screen" class="flex flex-col items-center justify-center min-h-screen p-4 safe-pb z-50 absolute inset-0 bg-[#020617]">
-        <div class="absolute w-64 h-64 bg-blue-600/20 rounded-full blur-[80px] top-1/4"></div>
-        <h1 class="text-4xl font-black mb-10 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 z-10">Finance</h1>
-        <div class="flex gap-6 mb-16 z-10">
-            <div class="w-3.5 h-3.5 rounded-full bg-slate-800 pin-dot transition-all duration-300 ring-1 ring-slate-700"></div>
-            <div class="w-3.5 h-3.5 rounded-full bg-slate-800 pin-dot transition-all duration-300 ring-1 ring-slate-700"></div>
-            <div class="w-3.5 h-3.5 rounded-full bg-slate-800 pin-dot transition-all duration-300 ring-1 ring-slate-700"></div>
-            <div class="w-3.5 h-3.5 rounded-full bg-slate-800 pin-dot transition-all duration-300 ring-1 ring-slate-700"></div>
+<body class="font-sans antialiased select-none touch-manipulation">
+    
+    <div id="auth-screen" class="flex flex-col items-center justify-center min-h-screen p-4 safe-pb z-50 absolute inset-0 bg-sumbg">
+        <h1 class="text-2xl font-bold mb-8 text-white">Введіть PIN</h1>
+        <div class="flex gap-6 mb-12">
+            <div class="w-3.5 h-3.5 rounded-full bg-sumcard pin-dot transition-all duration-200"></div>
+            <div class="w-3.5 h-3.5 rounded-full bg-sumcard pin-dot transition-all duration-200"></div>
+            <div class="w-3.5 h-3.5 rounded-full bg-sumcard pin-dot transition-all duration-200"></div>
+            <div class="w-3.5 h-3.5 rounded-full bg-sumcard pin-dot transition-all duration-200"></div>
         </div>
-        <div class="grid grid-cols-3 gap-5 w-72 max-w-full z-10" id="numpad"></div>
+        <div class="grid grid-cols-3 gap-3 w-72 max-w-full" id="numpad"></div>
     </div>
 
-    <!-- Main App Layout -->
-    <div id="app-screen" class="hidden h-screen flex-col relative overflow-hidden">
-        <header class="safe-pt px-6 pb-4 flex justify-between items-end shrink-0 z-10">
-            <h1 class="text-3xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400" id="header-title">Огляд</h1>
-            <button id="btn-sync" class="text-blue-400 font-bold text-xs py-2 px-4 rounded-full bg-blue-500/10 border border-blue-500/20 active:bg-blue-500/30 transition-all uppercase tracking-widest">Синхрон</button>
+    <div id="app-screen" class="hidden h-screen flex-col relative">
+        <header class="safe-pt px-5 pb-4 flex justify-between items-center shrink-0 z-10 bg-sumbg">
+            <h1 class="text-[22px] font-bold text-white" id="header-title">Огляд</h1>
+            <button id="btn-sync" class="text-sumblue font-semibold text-sm py-1.5 px-3 bg-sumblue/10 rounded-xl active:bg-sumblue/20">Синхронізувати</button>
         </header>
         
-        <main id="view-overview" class="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar z-10">
-            <div class="glass-card p-6 rounded-[2rem] relative overflow-hidden group">
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-active:scale-110 transition-transform duration-500"></div>
-                <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl"></div>
-                <p class="text-slate-400 text-[10px] font-bold mb-2 uppercase tracking-[0.2em] relative z-10">Загальний Баланс</p>
-                <p class="text-[2.5rem] font-black tracking-tighter text-white relative z-10 drop-shadow-md" id="balance-display">0.00 PLN</p>
+        <main id="view-overview" class="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar z-10 pb-24">
+            <div class="text-center pt-2 pb-6">
+                <p class="text-sumtext text-sm font-medium mb-1">Загальний баланс</p>
+                <p class="text-4xl font-bold text-white" id="balance-display">0.00 PLN</p>
             </div>
-            <div id="transactions-container" class="pb-24"></div>
+            <div id="transactions-container" class="space-y-3"></div>
         </main>
 
-        <main id="view-inbox" class="hidden flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar z-10">
-            <div class="glass-card !border-amber-500/30 !bg-amber-500/5 p-5 rounded-[2rem] mb-4">
-                <p class="text-amber-400 text-sm font-semibold">Потребує підтвердження або спліту.</p>
+        <main id="view-inbox" class="hidden flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar z-10 pb-24">
+            <div class="bg-[#1c1914] border border-[#332b1a] rounded-[20px] p-4 mb-2">
+                <p class="text-[#f5a623] text-sm font-medium">Транзакції потребують уточнення.</p>
             </div>
-            <div id="inbox-container" class="pb-24"></div>
+            <div id="inbox-container" class="space-y-3"></div>
         </main>
 
-        <main id="view-accounts" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar z-10">
-            <div>
-                <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-2">Гаманці</h2>
-                <div class="space-y-4">
-                    <div class="glass-card p-5 rounded-[2rem] flex justify-between items-center">
-                        <div class="flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-500/30">P</div><span class="font-bold text-slate-200">PKO Bank</span></div>
-                        <span class="font-black text-lg text-white" id="bal-pko">0.00 PLN</span>
-                    </div>
-                    <div class="glass-card p-5 rounded-[2rem] flex justify-between items-center">
-                        <div class="flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-800 to-black flex items-center justify-center border border-slate-700 text-white font-black text-xl shadow-lg">M</div><span class="font-bold text-slate-200">Monobank</span></div>
-                        <span class="font-black text-lg text-white" id="bal-mono">0.00 PLN</span>
-                    </div>
+        <main id="view-accounts" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar z-10 pb-24">
+            <div class="space-y-3">
+                <div class="bg-sumcard p-4 rounded-[20px] flex justify-between items-center">
+                    <div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-[#1c2438] flex items-center justify-center text-sumblue font-bold">P</div><span class="font-semibold text-white">PKO Bank</span></div>
+                    <span class="font-semibold text-white" id="bal-pko">0.00 PLN</span>
+                </div>
+                <div class="bg-sumcard p-4 rounded-[20px] flex justify-between items-center">
+                    <div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-black flex items-center justify-center text-white font-bold border border-[#2a2f3a]">M</div><span class="font-semibold text-white">Monobank</span></div>
+                    <span class="font-semibold text-white" id="bal-mono">0.00 PLN</span>
                 </div>
             </div>
         </main>
 
-        <main id="view-analytics" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar z-10">
-            <div class="flex items-center justify-between glass-card rounded-[2rem] p-1.5">
-                <button onclick="changePeriodOffset(-1)" id="btn-period-prev" class="p-3 text-slate-400 active:bg-slate-700/50 rounded-2xl transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                <button onclick="document.getElementById('period-modal').classList.remove('hidden')" class="flex-1 py-3 text-sm font-bold text-center flex items-center justify-center gap-2 active:bg-slate-700/50 rounded-2xl transition-colors"><span id="period-label" class="text-white tracking-wide">Жовтень</span><svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
-                <button onclick="changePeriodOffset(1)" id="btn-period-next" class="p-3 text-slate-400 active:bg-slate-700/50 rounded-2xl transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+        <main id="view-analytics" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar z-10 pb-24">
+            <div class="flex items-center justify-between bg-sumcard rounded-[20px] p-1">
+                <button onclick="changePeriodOffset(-1)" id="btn-period-prev" class="p-3 text-sumtext active:bg-[#1e2433] rounded-xl"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                <button onclick="document.getElementById('period-modal').classList.remove('hidden')" class="flex-1 py-3 text-sm font-bold text-center flex items-center justify-center gap-2 active:bg-[#1e2433] rounded-xl text-white">
+                    <span id="period-label">Жовтень 2026</span><svg class="w-4 h-4 text-sumtext" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <button onclick="changePeriodOffset(1)" id="btn-period-next" class="p-3 text-sumtext active:bg-[#1e2433] rounded-xl"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
             </div>
-            <div class="relative w-64 h-64 mx-auto my-8">
-                <div class="absolute inset-0 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                <canvas id="analytics-chart" class="relative z-10"></canvas>
-                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20" id="chart-center-content">
-                    <div id="chart-icon-box" class="text-3xl mb-1 drop-shadow-lg transition-transform scale-110">📊</div>
-                    <span id="chart-lbl" class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-1">Витрати</span>
-                    <span id="chart-val" class="text-xl font-black text-white mt-0.5 tracking-tight">0.00 PLN</span>
+            
+            <div class="bg-sumcard rounded-[32px] p-6 mt-4">
+                <div class="relative w-60 h-60 mx-auto">
+                    <canvas id="analytics-chart"></canvas>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
+                        <div id="chart-icon-box" class="w-10 h-10 bg-[#1c2230] rounded-xl flex items-center justify-center text-xl mb-1 hidden"></div>
+                        <span id="chart-lbl" class="text-[10px] text-sumtext uppercase font-bold tracking-widest mt-1">Витрати</span>
+                        <span id="chart-val" class="text-xl font-bold text-white mt-1">0.00 PLN</span>
+                        <span id="chart-pct" class="text-sm font-bold text-white hidden"></span>
+                    </div>
                 </div>
             </div>
-            <div class="space-y-3 pb-24" id="analytics-categories"></div>
+            
+            <div class="space-y-3" id="analytics-categories"></div>
         </main>
 
-        <!-- FAB -->
-        <button id="btn-add-modal" class="absolute bottom-28 right-6 w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-full flex items-center justify-center glow-btn active:scale-90 transition-all z-30 border border-white/20">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+        <button id="btn-add-modal" class="absolute bottom-24 right-5 w-14 h-14 bg-sumblue rounded-full flex items-center justify-center shadow-lg active:opacity-80 transition-opacity z-30">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
         </button>
 
-        <!-- Nav -->
-        <nav class="safe-pb pt-4 px-4 flex justify-around shrink-0 glass-nav z-20 absolute bottom-0 w-full rounded-t-[2rem]">
-            <button id="nav-overview" class="p-2 text-blue-400 flex flex-col items-center gap-1.5 w-16 transition-colors" onclick="switchTab('overview')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span class="text-[9px] font-bold uppercase tracking-wider">Огляд</span></button>
-            <button id="nav-inbox" class="p-2 text-slate-500 flex flex-col items-center gap-1.5 w-16 relative transition-colors" onclick="switchTab('inbox')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg><span class="text-[9px] font-bold uppercase tracking-wider">Inbox</span><span id="inbox-badge" class="absolute top-1 right-2 flex h-2.5 w-2.5 rounded-full bg-red-500 hidden shadow-[0_0_10px_rgba(239,68,68,0.8)]"></span></button>
-            <button id="nav-accounts" class="p-2 text-slate-500 flex flex-col items-center gap-1.5 w-16 transition-colors" onclick="switchTab('accounts')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg><span class="text-[9px] font-bold uppercase tracking-wider">Рахунки</span></button>
-            <button id="nav-analytics" class="p-2 text-slate-500 flex flex-col items-center gap-1.5 w-16 transition-colors" onclick="switchTab('analytics')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg><span class="text-[9px] font-bold uppercase tracking-wider">Аналітика</span></button>
+        <nav class="safe-pb pt-2 px-2 flex justify-around shrink-0 bg-sumbg border-t border-[#1e2433] z-20 absolute bottom-0 w-full">
+            <button id="nav-overview" class="p-2 text-sumblue flex flex-col items-center gap-1 w-16" onclick="switchTab('overview')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span class="text-[10px] font-medium">Огляд</span></button>
+            <button id="nav-inbox" class="p-2 text-sumtext flex flex-col items-center gap-1 w-16 relative" onclick="switchTab('inbox')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg><span class="text-[10px] font-medium">Inbox</span><span id="inbox-badge" class="absolute top-1 right-2 flex h-2 w-2 rounded-full bg-red-500 hidden"></span></button>
+            <button id="nav-accounts" class="p-2 text-sumtext flex flex-col items-center gap-1 w-16" onclick="switchTab('accounts')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg><span class="text-[10px] font-medium">Рахунки</span></button>
+            <button id="nav-analytics" class="p-2 text-sumtext flex flex-col items-center gap-1 w-16" onclick="switchTab('analytics')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg><span class="text-[10px] font-medium">Статистика</span></button>
         </nav>
     </div>
 
-    <!-- Modals (Unified Form + Period) -->
-    <div id="tx-modal" class="hidden fixed inset-0 bg-[#020617]/90 z-50 flex-col justify-end backdrop-blur-md transition-opacity">
-        <div class="glass-card rounded-t-[2.5rem] p-6 safe-pb border-t border-white/10 max-h-[90vh] overflow-y-auto">
+    <!-- Modals -->
+    <div id="tx-modal" class="hidden fixed inset-0 bg-[#0b0e14]/90 z-50 flex-col justify-end transition-opacity">
+        <div class="bg-[#151923] rounded-t-[32px] p-6 safe-pb max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 safe-pt mt-2">
-                <h2 id="modal-title" class="text-2xl font-black text-white tracking-tight">Нова операція</h2>
-                <div class="flex items-center gap-3">
-                    <button id="btn-delete-tx" class="hidden p-2.5 text-red-400 bg-red-500/10 rounded-2xl active:bg-red-500/20"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                    <button onclick="closeTxModal()" class="p-2.5 text-slate-300 bg-white/5 rounded-2xl border border-white/10 active:bg-white/10"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                <h2 id="modal-title" class="text-xl font-bold text-white">Нова операція</h2>
+                <div class="flex gap-2">
+                    <button id="btn-delete-tx" class="hidden p-2 text-red-500"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                    <button onclick="closeTxModal()" class="p-2 text-sumtext"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
             </div>
-            <div class="space-y-6">
+            <div class="space-y-4">
                 <input type="hidden" id="form-id">
-                <div class="flex bg-black/40 p-1.5 rounded-[1.2rem] border border-white/5 shadow-inner">
-                    <button id="btn-type-expense" onclick="setFormType('Expense')" class="flex-1 py-2.5 text-sm font-bold rounded-[1rem] bg-slate-700 text-white shadow-lg tx-type-btn">Витрата</button>
-                    <button id="btn-type-income" onclick="setFormType('Income')" class="flex-1 py-2.5 text-sm font-bold rounded-[1rem] text-slate-400 tx-type-btn">Дохід</button>
-                    <button id="btn-type-transfer" onclick="setFormType('Transfer')" class="flex-1 py-2.5 text-sm font-bold rounded-[1rem] text-slate-400 tx-type-btn">Переказ</button>
+                <div class="flex bg-sumbg p-1 rounded-xl">
+                    <button id="btn-type-expense" onclick="setFormType('Expense')" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-sumcard text-white tx-type-btn">Витрата</button>
+                    <button id="btn-type-income" onclick="setFormType('Income')" class="flex-1 py-2 text-sm font-semibold rounded-lg text-sumtext tx-type-btn">Дохід</button>
+                    <button id="btn-type-transfer" onclick="setFormType('Transfer')" class="flex-1 py-2 text-sm font-semibold rounded-lg text-sumtext tx-type-btn">Переказ</button>
                 </div>
-                <div>
-                    <label class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] pl-3 mb-1 block">Сума (PLN)</label>
-                    <input type="number" id="form-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-black/40 border border-white/10 rounded-[1.5rem] px-4 py-5 text-4xl font-black text-center text-white focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all shadow-inner">
+                <div><label class="text-xs text-sumtext ml-1 block mb-1">Сума (PLN)</label><input type="number" id="form-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-sumbg border border-[#2a2f3a] rounded-xl px-4 py-4 text-3xl font-bold text-center text-white focus:outline-none focus:border-sumblue"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label id="lbl-form-acc1" class="text-xs text-sumtext ml-1 block mb-1">З рахунку</label><select id="form-acc1" class="w-full bg-sumbg border border-[#2a2f3a] rounded-xl px-4 py-3 text-sm font-medium text-white appearance-none focus:outline-none focus:border-sumblue"></select></div>
+                    <div><label id="lbl-form-acc2" class="text-xs text-sumtext ml-1 block mb-1">Категорія</label><select id="form-acc2" class="w-full bg-sumbg border border-[#2a2f3a] rounded-xl px-4 py-3 text-sm font-medium text-white appearance-none focus:outline-none focus:border-sumblue"></select></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-1.5">
-                        <label id="lbl-form-acc1" class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] pl-3">З рахунку</label>
-                        <select id="form-acc1" class="w-full bg-black/40 border border-white/10 rounded-[1.2rem] px-4 py-4 text-sm font-bold text-white appearance-none focus:outline-none focus:border-blue-500"></select>
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label id="lbl-form-acc2" class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] pl-3">Категорія</label>
-                        <select id="form-acc2" class="w-full bg-black/40 border border-white/10 rounded-[1.2rem] px-4 py-4 text-sm font-bold text-white appearance-none focus:outline-none focus:border-blue-500"></select>
-                    </div>
+                <div><label class="text-xs text-sumtext ml-1 block mb-1">Коментар</label><input type="text" id="form-desc" placeholder="Деталі..." class="w-full bg-sumbg border border-[#2a2f3a] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-sumblue"></div>
+                
+                <div class="border-t border-[#2a2f3a] pt-4 hidden" id="split-module">
+                    <button type="button" onclick="toggleSplitMode()" class="w-full py-3 text-sm font-semibold text-sumblue bg-sumblue/10 rounded-xl">Розбити чек (Спліт)</button>
+                    <div id="split-container" class="hidden space-y-2 mt-3"></div>
+                    <button type="button" id="btn-add-split-row" onclick="addSplitRow()" class="hidden w-full py-2 text-xs font-semibold text-sumtext bg-sumbg rounded-xl mt-2">+ Додати</button>
                 </div>
-                <div>
-                    <label class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] pl-3 mb-1 block">Коментар</label>
-                    <input type="text" id="form-desc" placeholder="Деталі..." class="w-full bg-black/40 border border-white/10 rounded-[1.2rem] px-4 py-4 text-sm font-medium text-white focus:outline-none focus:border-blue-500">
-                </div>
-                <div class="border-t border-white/10 pt-5 hidden" id="split-module">
-                    <button type="button" onclick="toggleSplitMode()" class="w-full py-3.5 text-sm font-bold text-indigo-400 bg-indigo-500/10 rounded-[1.2rem] active:bg-indigo-500/20 border border-indigo-500/20">Розбити чек (Спліт)</button>
-                    <div id="split-container" class="hidden space-y-3 mt-4"></div>
-                    <button type="button" id="btn-add-split-row" onclick="addSplitRow()" class="hidden w-full py-3 text-xs font-bold text-slate-300 bg-white/5 rounded-[1rem] mt-3 border border-white/10">+ Додати частину</button>
-                </div>
-                <button id="btn-submit-tx" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black py-5 rounded-[1.5rem] mt-4 active:scale-95 transition-all text-lg tracking-wider glow-btn border border-white/10">ЗБЕРЕГТИ</button>
+                <button id="btn-submit-tx" class="w-full bg-[#f5a623] text-[#4d3205] font-bold py-4 rounded-xl mt-2 active:opacity-80">Зберегти</button>
             </div>
         </div>
     </div>
 
     <!-- Period Modal -->
-    <div id="period-modal" class="hidden fixed inset-0 bg-[#020617]/90 z-50 flex-col justify-end backdrop-blur-md transition-opacity">
-        <div class="glass-card rounded-t-[2.5rem] p-6 safe-pt safe-pb transform transition-transform border-t border-white/10">
-            <h2 class="text-xl font-bold mb-6 text-center mt-4 text-white">Період Аналітики</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <button onclick="setPeriodType('all')" class="bg-black/40 p-5 rounded-[1.5rem] flex flex-col items-center justify-center gap-2 active:bg-white/5 border border-white/10"><span class="text-sm font-bold text-white">Весь час</span></button>
-                <button onclick="setPeriodType('month')" class="bg-black/40 p-5 rounded-[1.5rem] flex flex-col items-center justify-center gap-2 active:bg-white/5 border border-white/10"><span class="text-2xl font-black text-blue-400">30</span><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Місяць</span></button>
-                <button onclick="setPeriodType('week')" class="bg-black/40 p-5 rounded-[1.5rem] flex flex-col items-center justify-center gap-2 active:bg-white/5 border border-white/10"><span class="text-2xl font-black text-purple-400">7</span><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Тиждень</span></button>
-                <button onclick="setPeriodType('custom')" class="bg-black/40 p-5 rounded-[1.5rem] flex flex-col items-center justify-center gap-2 active:bg-white/5 border border-white/10"><span class="text-sm font-bold text-white">Діапазон</span></button>
+    <div id="period-modal" class="hidden fixed inset-0 bg-[#0b0e14]/90 z-50 flex-col justify-end transition-opacity">
+        <div class="bg-[#151923] rounded-t-[32px] p-6 safe-pt safe-pb">
+            <h2 class="text-xl font-bold mb-6 text-center mt-4 text-white">Проміжок часу</h2>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="setPeriodType('all')" class="bg-[#1c212b] border border-[#2a2f3a] p-4 rounded-2xl flex flex-col items-center gap-1 active:bg-[#232936]"><svg class="w-6 h-6 text-sumtext" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="text-sm font-medium text-white">Весь час</span></button>
+                <button onclick="setPeriodType('year')" class="bg-[#1c212b] border border-[#2a2f3a] p-4 rounded-2xl flex flex-col items-center gap-1 active:bg-[#232936]"><span class="text-xl font-bold text-sumtext">365</span><span class="text-sm font-medium text-white">Рік</span></button>
+                <button onclick="setPeriodType('month')" class="bg-[#1c212b] border border-[#2a2f3a] p-4 rounded-2xl flex flex-col items-center gap-1 active:bg-[#232936]"><span class="text-xl font-bold text-white">30</span><span class="text-sm font-medium text-white">Місяць</span></button>
+                <button onclick="setPeriodType('week')" class="bg-[#1c212b] border border-[#2a2f3a] p-4 rounded-2xl flex flex-col items-center gap-1 active:bg-[#232936]"><span class="text-xl font-bold text-white">7</span><span class="text-sm font-medium text-white">Тиждень</span></button>
+                <button onclick="setPeriodType('day')" class="bg-[#1c212b] border border-[#2a2f3a] p-4 rounded-2xl flex flex-col items-center gap-1 active:bg-[#232936]"><span class="text-xl font-bold text-white">1</span><span class="text-sm font-medium text-white">День</span></button>
+                <button onclick="toggleCustomDates()" class="bg-[#1c212b] border border-[#2a2f3a] p-4 rounded-2xl flex flex-col items-center gap-1 active:bg-[#232936]"><svg class="w-6 h-6 text-sumtext" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg><span class="text-sm font-medium text-white">Діапазон</span></button>
             </div>
-            <div id="custom-date-inputs" class="hidden flex-col gap-3 mb-6 bg-black/40 p-5 rounded-[1.5rem] border border-white/10">
-                <div class="flex items-center gap-4"><span class="text-slate-400 text-xs font-bold uppercase tracking-widest w-8">Від</span><input type="date" id="date-start" class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white font-medium focus:outline-none"></div>
-                <div class="flex items-center gap-4"><span class="text-slate-400 text-xs font-bold uppercase tracking-widest w-8">До</span><input type="date" id="date-end" class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white font-medium focus:outline-none"></div>
-                <button onclick="setPeriodType('custom')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-3 active:bg-blue-700">Застосувати</button>
+            <div id="custom-date-inputs" class="hidden flex-col gap-3 mb-6 bg-[#1c212b] border border-[#2a2f3a] p-4 rounded-2xl">
+                <div class="flex items-center gap-3"><span class="text-sumtext text-sm w-8">Від</span><input type="date" id="date-start" class="flex-1 bg-sumbg border border-[#2a2f3a] rounded-xl px-3 py-2 text-sm text-white focus:outline-none"></div>
+                <div class="flex items-center gap-3"><span class="text-sumtext text-sm w-8">До</span><input type="date" id="date-end" class="flex-1 bg-sumbg border border-[#2a2f3a] rounded-xl px-3 py-2 text-sm text-white focus:outline-none"></div>
+                <button onclick="setPeriodType('custom')" class="w-full bg-sumblue text-white font-bold py-3 rounded-xl mt-2">Застосувати</button>
             </div>
-            <button onclick="document.getElementById('period-modal').classList.add('hidden')" class="w-full text-slate-400 bg-white/5 font-bold py-4 rounded-[1.5rem] active:bg-white/10 border border-white/10">Скасувати</button>
+            <button onclick="document.getElementById('period-modal').classList.add('hidden')" class="w-full text-sumblue font-bold py-4">Скасувати</button>
         </div>
     </div>
 <script>
