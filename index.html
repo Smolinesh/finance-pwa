@@ -9,9 +9,7 @@
     <title>Finance Tracker</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' };
-    </script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
     <style>
         .safe-pt { padding-top: max(1.5rem, env(safe-area-inset-top)); }
         .safe-pb { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
@@ -22,9 +20,9 @@
 <body class="bg-gray-900 text-gray-100 font-sans antialiased select-none touch-manipulation">
 
     <!-- Auth Screen -->
-    <div id="auth-screen" class="flex flex-col items-center justify-center min-h-screen p-4 safe-pb">
+    <div id="auth-screen" class="flex flex-col items-center justify-center min-h-screen p-4 safe-pb z-50 bg-gray-900 relative">
         <h1 class="text-2xl font-bold mb-8">Введіть PIN</h1>
-        <div class="flex gap-6 mb-12" id="pin-indicators">
+        <div class="flex gap-6 mb-12">
             <div class="w-4 h-4 rounded-full bg-gray-700 pin-dot transition-colors duration-200"></div>
             <div class="w-4 h-4 rounded-full bg-gray-700 pin-dot transition-colors duration-200"></div>
             <div class="w-4 h-4 rounded-full bg-gray-700 pin-dot transition-colors duration-200"></div>
@@ -33,14 +31,17 @@
         <div class="grid grid-cols-3 gap-4 w-72 max-w-full" id="numpad"></div>
     </div>
 
-    <!-- Main App Screen -->
+    <!-- Main App Layout -->
     <div id="app-screen" class="hidden h-screen flex-col relative">
+        
+        <!-- Header -->
         <header class="safe-pt px-4 pb-3 border-b border-gray-800 flex justify-between items-end shrink-0 bg-gray-900/95 backdrop-blur z-10">
-            <h1 class="text-2xl font-bold tracking-tight">Огляд</h1>
+            <h1 class="text-2xl font-bold tracking-tight" id="header-title">Огляд</h1>
             <button id="btn-sync" class="text-blue-400 font-semibold text-sm py-1 px-2 bg-blue-500/10 rounded-lg active:bg-blue-500/20 transition-colors">Синхронізувати</button>
         </header>
         
-        <main class="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar">
+        <!-- View: Overview -->
+        <main id="view-overview" class="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar">
             <div class="bg-gray-800 p-6 rounded-3xl shadow-lg border border-gray-700/50 relative overflow-hidden">
                 <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
                 <p class="text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">Загальний Баланс</p>
@@ -49,75 +50,100 @@
                     <span class="text-gray-400 font-semibold text-lg">PLN</span>
                 </div>
             </div>
-            
             <div class="space-y-3" id="transactions-container">
                 <h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>
-                <div class="bg-gray-800/50 rounded-2xl p-4 text-center text-gray-500 text-sm border border-gray-800">
-                    Немає транзакцій. Натисніть "Синхронізувати".
-                </div>
             </div>
         </main>
-        
+
+        <!-- View: Inbox -->
+        <main id="view-inbox" class="hidden flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-gray-900">
+            <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 mb-4">
+                <p class="text-yellow-400 text-sm font-medium">Транзакції, що потребують уточнення категорії або суми конвертації.</p>
+            </div>
+            <div class="space-y-3" id="inbox-container"></div>
+        </main>
+
         <!-- FAB Add Button -->
         <button id="btn-add-modal" class="absolute bottom-24 right-4 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-600/30 active:bg-blue-700 transition-transform active:scale-95 z-20">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
         </button>
 
+        <!-- Bottom Navigation -->
         <nav class="safe-pb pt-2 px-2 border-t border-gray-800 flex justify-around shrink-0 bg-gray-900/95 backdrop-blur z-10">
-            <button class="p-2 text-blue-400 flex flex-col items-center gap-1.5 w-16">
+            <button id="nav-overview" class="p-2 text-blue-400 flex flex-col items-center gap-1.5 w-16 nav-btn" onclick="switchTab('overview')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
                 <span class="text-[10px] font-bold">Огляд</span>
             </button>
-            <button class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16 relative">
+            <button id="nav-inbox" class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16 relative nav-btn" onclick="switchTab('inbox')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
                 <span class="text-[10px] font-bold">Inbox</span>
+                <span id="inbox-badge" class="absolute top-1 right-2 flex h-2.5 w-2.5 rounded-full bg-red-500 hidden border-2 border-gray-900"></span>
             </button>
         </nav>
     </div>
 
-    <!-- Add Transaction Modal -->
+    <!-- Modals (Add & Edit) -->
+    <!-- Add Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
         <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb transform transition-transform border-t border-gray-800">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold">Нова операція</h2>
-                <button id="btn-close-modal" class="p-2 text-gray-400 active:text-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                <button onclick="document.getElementById('add-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
-            
             <div class="space-y-4">
                 <div class="flex bg-gray-800 p-1 rounded-xl">
-                    <button id="type-expense" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-gray-700 text-white shadow">Витрата</button>
-                    <button id="type-income" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 active:bg-gray-700/50">Дохід</button>
-                    <button id="type-transfer" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 active:bg-gray-700/50">Переказ</button>
+                    <button id="type-expense" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-gray-700 text-white shadow tx-type-btn">Витрата</button>
+                    <button id="type-income" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 tx-type-btn">Дохід</button>
                 </div>
-                
-                <input type="number" id="input-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-4 text-3xl font-bold text-center focus:outline-none focus:border-blue-500 placeholder-gray-600 text-white">
-                
+                <input type="number" id="input-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-4 text-3xl font-bold text-center text-white">
                 <div class="grid grid-cols-2 gap-3">
-                    <select id="input-account" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 text-white appearance-none">
-                        <option value="Everyday">Everyday</option>
-                        <option value="Savings">Savings</option>
-                        <option value="Cash">Cash</option>
-                    </select>
-                    
-                    <select id="input-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 text-white appearance-none">
-                        <option value="Продукти">Продукти</option>
-                        <option value="Транспорт">Транспорт</option>
-                        <option value="Житло">Житло</option>
-                        <option value="Розваги">Розваги</option>
-                        <option value="Зарплата">Зарплата</option>
-                        <option value="Інше">Інше</option>
+                    <select id="input-account" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none"><option value="Everyday">Everyday</option><option value="Cash">Cash</option></select>
+                    <select id="input-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
+                        <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
                     </select>
                 </div>
-                
-                <input type="text" id="input-desc" placeholder="Коментар (Biedronka, Кава...)" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-500 text-white">
-                
+                <input type="text" id="input-desc" placeholder="Коментар" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white">
                 <button id="btn-submit-tx" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-2 active:bg-blue-700 shadow-lg shadow-blue-600/20">Зберегти</button>
             </div>
         </div>
     </div>
 
+    <!-- Edit Modal (Inbox) -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
+        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb transform transition-transform border-t border-gray-800">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-yellow-500">Редагування Inbox</h2>
+                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <div class="space-y-4">
+                <input type="hidden" id="edit-id">
+                <div>
+                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Оригінальний опис</label>
+                    <input type="text" id="edit-desc" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Сума (PLN)</label>
+                    <input type="number" id="edit-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-yellow-700 rounded-xl px-4 py-4 text-3xl font-bold text-center text-white">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Категорія</label>
+                    <select id="edit-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
+                        <option value="Продукти">Продукти</option>
+                        <option value="Транспорт">Транспорт</option>
+                        <option value="Житло">Житло</option>
+                        <option value="Розваги">Розваги</option>
+                        <option value="Підписки">Підписки</option>
+                        <option value="Здоров'я">Здоров'я</option>
+                        <option value="Інше">Інше</option>
+                    </select>
+                </div>
+                <button id="btn-submit-edit" class="w-full bg-yellow-600 text-white font-bold py-4 rounded-xl mt-4 active:bg-yellow-700">Оновити транзакцію</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const PIN = "1234";
+        const PIN = "1235";
         let currentPin = "";
         
         // ВСТАВ СВІЙ АКТУАЛЬНИЙ URL ТУТ!
@@ -127,233 +153,79 @@
             window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
         }
 
-        // --- Auth Logic ---
-        const numpadContainer = document.getElementById('numpad');
-        const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'ID', 0, 'C'];
-
-        keys.forEach(key => {
+        // Auth Logic
+        const numpad = document.getElementById('numpad');
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 'ID', 0, 'C'].forEach(key => {
             const btn = document.createElement('button');
-            btn.className = "h-16 flex items-center justify-center text-2xl font-medium bg-gray-800/80 rounded-2xl active:bg-gray-700 transition-colors border border-gray-700/50 shadow-sm";
-            if (key === 'ID') btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" /></svg>`;
-            else if (key === 'C') btn.innerHTML = `<span class="text-xl font-bold text-red-400">C</span>`;
-            else btn.textContent = key;
-            btn.onclick = () => handleNumpad(key);
-            numpadContainer.appendChild(btn);
+            btn.className = "h-16 flex items-center justify-center text-2xl font-medium bg-gray-800/80 rounded-2xl active:bg-gray-700 border border-gray-700/50 shadow-sm";
+            btn.innerHTML = key === 'ID' ? `<span class="text-sm text-blue-400 font-bold">FaceID</span>` : key === 'C' ? `<span class="text-xl font-bold text-red-400">C</span>` : key;
+            btn.onclick = () => {
+                if (key === 'C') currentPin = currentPin.slice(0, -1);
+                else if (key === 'ID') return;
+                else if (currentPin.length < 4) currentPin += key;
+                
+                document.querySelectorAll('.pin-dot').forEach((dot, i) => dot.classList.toggle('bg-blue-500', i < currentPin.length));
+                
+                if (currentPin.length === 4) {
+                    setTimeout(() => {
+                        if (currentPin === PIN) {
+                            document.getElementById('auth-screen').classList.add('hidden');
+                            document.getElementById('app-screen').classList.remove('hidden');
+                            document.getElementById('app-screen').classList.add('flex');
+                            syncData();
+                            processOfflineQueue();
+                        } else {
+                            currentPin = "";
+                            document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('bg-blue-500'));
+                            if (navigator.vibrate) navigator.vibrate(200);
+                        }
+                    }, 100);
+                }
+            };
+            numpad.appendChild(btn);
         });
 
-        function handleNumpad(val) {
-            if (val === 'C') currentPin = currentPin.slice(0, -1);
-            else if (val === 'ID') return alert("Face ID в розробці.");
-            else if (currentPin.length < 4) currentPin += val;
+        // Tab Navigation Logic
+        function switchTab(tab) {
+            const vOverview = document.getElementById('view-overview');
+            const vInbox = document.getElementById('view-inbox');
+            const nOverview = document.getElementById('nav-overview');
+            const nInbox = document.getElementById('nav-inbox');
+            const title = document.getElementById('header-title');
             
-            updatePinUI();
-            
-            if (currentPin.length === 4) {
-                setTimeout(() => {
-                    if (currentPin === PIN) {
-                        document.getElementById('auth-screen').classList.add('hidden');
-                        document.getElementById('app-screen').classList.remove('hidden');
-                        document.getElementById('app-screen').classList.add('flex');
-                        syncData();
-                        processOfflineQueue(); // Перевіряємо чергу при вході
-                    } else {
-                        currentPin = "";
-                        updatePinUI();
-                        if (navigator.vibrate) navigator.vibrate(200);
-                    }
-                }, 100);
+            if (tab === 'overview') {
+                vOverview.classList.remove('hidden'); vInbox.classList.add('hidden');
+                nOverview.classList.replace('text-gray-500', 'text-blue-400');
+                nInbox.classList.replace('text-blue-400', 'text-gray-500');
+                title.textContent = "Огляд";
+            } else {
+                vOverview.classList.add('hidden'); vInbox.classList.remove('hidden');
+                nInbox.classList.replace('text-gray-500', 'text-blue-400');
+                nOverview.classList.replace('text-blue-400', 'text-gray-500');
+                title.textContent = "Inbox";
             }
         }
 
-        function updatePinUI() {
-            document.querySelectorAll('.pin-dot').forEach((dot, i) => {
-                dot.classList.toggle('bg-blue-500', i < currentPin.length);
-                dot.classList.toggle('bg-gray-700', i >= currentPin.length);
-            });
-        }
-
-        // --- Fetch Data Logic ---
+        // Fetch & Render Data
+        let globalTransactions = [];
         async function syncData() {
             const btn = document.getElementById('btn-sync');
-            btn.textContent = "Оновлення...";
+            btn.textContent = "Оновл...";
             try {
-                if (!navigator.onLine) {
-                    btn.textContent = "Офлайн";
-                    return;
-                }
+                if (!navigator.onLine) return btn.textContent = "Офлайн";
                 const res = await fetch(WEB_APP_URL);
                 const data = await res.json();
                 
                 if(data.status === "success") {
                     document.getElementById('balance-display').textContent = data.balance;
-                    const txContainer = document.getElementById('transactions-container');
-                    txContainer.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>';
-                    
-                    if (data.transactions.length === 0) {
-                        txContainer.innerHTML += `<div class="bg-gray-800/50 rounded-2xl p-4 text-center text-gray-500 text-sm border border-gray-800">Немає транзакцій.</div>`;
-                    } else {
-                        data.transactions.forEach(tx => {
-                            const isExpense = tx.type === 'Expense';
-                            const sign = isExpense ? '-' : '+';
-                            const color = isExpense ? 'text-gray-100' : 'text-green-400';
-                            txContainer.innerHTML += `
-                            <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border border-gray-800">
-                                <div>
-                                    <p class="font-medium text-gray-200">${tx.description || tx.category}</p>
-                                    <p class="text-xs text-gray-500 mt-1">${tx.category} • ${tx.date}</p>
-                                </div>
-                                <p class="font-bold ${color}">${sign}${parseFloat(tx.amount).toFixed(2)}</p>
-                            </div>`;
-                        });
-                    }
+                    globalTransactions = data.transactions;
+                    renderTransactions();
                 }
-            } catch (err) {
-                console.error("Синхронізація не вдалася", err);
-            } finally {
-                if (navigator.onLine) btn.textContent = "Синхронізувати";
-            }
+            } catch (err) { console.error(err); } 
+            finally { if (navigator.onLine) btn.textContent = "Синхронізувати"; }
         }
         document.getElementById('btn-sync').addEventListener('click', syncData);
 
-        // --- Modal Logic ---
-        const modal = document.getElementById('add-modal');
-        let currentTxType = 'Expense';
-
-        document.getElementById('btn-add-modal').onclick = () => modal.classList.remove('hidden');
-        document.getElementById('btn-close-modal').onclick = () => modal.classList.add('hidden');
-
-        ['expense', 'income', 'transfer'].forEach(type => {
-            document.getElementById(`type-${type}`).onclick = (e) => {
-                document.querySelectorAll('#add-modal .flex button').forEach(b => {
-                    b.classList.remove('bg-gray-700', 'text-white', 'shadow');
-                    b.classList.add('text-gray-400');
-                });
-                e.target.classList.remove('text-gray-400');
-                e.target.classList.add('bg-gray-700', 'text-white', 'shadow');
-                const typeMap = { 'expense': 'Expense', 'income': 'Income', 'transfer': 'Transfer' };
-                currentTxType = typeMap[type];
-            };
-        });
-
-        // --- Offline Queue Logic ---
-        function saveOfflineTx(payload) {
-            let queue = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
-            queue.push(payload);
-            localStorage.setItem('offlineTxQueue', JSON.stringify(queue));
-            alert("Немає зв'язку. Операцію збережено локально. Вона відправиться автоматично при підключенні до інтернету.");
-            
-            const txContainer = document.getElementById('transactions-container');
-            const isExpense = payload.type === 'Expense';
-            const sign = isExpense ? '-' : '+';
-            const color = isExpense ? 'text-gray-100' : 'text-green-400';
-            
-            if (txContainer.innerHTML.includes('Немає транзакцій')) {
-                txContainer.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>';
-            }
-
-            const newTxHtml = `
-            <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border border-gray-800 opacity-60">
-                <div>
-                    <p class="font-medium text-gray-200">⏳ ${payload.description || payload.category}</p>
-                    <p class="text-xs text-yellow-500 mt-1">Очікує синхронізації</p>
-                </div>
-                <p class="font-bold ${color}">${sign}${parseFloat(payload.amount).toFixed(2)}</p>
-            </div>`;
-            
-            txContainer.insertAdjacentHTML('afterbegin', newTxHtml); // Додаємо зверху
-        }
-
-        async function processOfflineQueue() {
-            let queue = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
-            if (queue.length === 0) return;
-
-            let remainingQueue = [];
-            for (let i = 0; i < queue.length; i++) {
-                try {
-                    const res = await fetch(WEB_APP_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify(queue[i])
-                    });
-                    const result = await res.json();
-                    if (result.status !== "success") {
-                        remainingQueue.push(queue[i]);
-                    }
-                } catch (err) {
-                    remainingQueue.push(queue[i]);
-                    break;
-                }
-            }
-
-            localStorage.setItem('offlineTxQueue', JSON.stringify(remainingQueue));
-            if (remainingQueue.length < queue.length) {
-                syncData();
-            }
-        }
-
-        window.addEventListener('online', processOfflineQueue);
-
-        // --- Submit Transaction ---
-        document.getElementById('btn-submit-tx').onclick = async () => {
-            const amount = document.getElementById('input-amount').value;
-            const account = document.getElementById('input-account').value;
-            const category = document.getElementById('input-category').value;
-            const desc = document.getElementById('input-desc').value;
-
-            if (!amount || amount <= 0) return alert("Введіть коректну суму");
-
-            const btn = document.getElementById('btn-submit-tx');
-            btn.textContent = "Збереження...";
-            btn.disabled = true;
-
-            const payload = {
-                source: "pwa",
-                type: currentTxType,
-                amount: amount,
-                accountFrom: currentTxType === 'Expense' || currentTxType === 'Transfer' ? account : "",
-                accountTo: currentTxType === 'Income' || currentTxType === 'Transfer' ? account : "",
-                category: category,
-                description: desc,
-                date: new Date().toISOString()
-            };
-
-            try {
-                if (!navigator.onLine) {
-                    saveOfflineTx(payload);
-                    modal.classList.add('hidden');
-                    document.getElementById('input-amount').value = '';
-                    document.getElementById('input-desc').value = '';
-                    btn.textContent = "Зберегти";
-                    btn.disabled = false;
-                    return;
-                }
-
-                const res = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await res.json();
-                if (result.status === "success") {
-                    modal.classList.add('hidden');
-                    document.getElementById('input-amount').value = '';
-                    document.getElementById('input-desc').value = '';
-                    syncData();
-                } else {
-                    alert("Помилка БД: " + result.message);
-                }
-            } catch (err) {
-                // Якщо помилка сталася під час запиту (наприклад, інтернет зник в процесі)
-                saveOfflineTx(payload);
-                modal.classList.add('hidden');
-                document.getElementById('input-amount').value = '';
-                document.getElementById('input-desc').value = '';
-            } finally {
-                btn.textContent = "Зберегти";
-                btn.disabled = false;
-            }
-        };
-    </script>
-</body>
-</html>
+        function renderTransactions() {
+            const txCont = document.getElementById('transactions-container');
+            const inxCont = document.getElementById('inbox
