@@ -408,4 +408,64 @@
             for (let i = 0; i < queue.length; i++) {
                 try {
                     const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(queue[i]) });
-                    if ((await res.
+                    if ((await res.json()).status !== "success") remainingQueue.push(queue[i]);
+                } catch { remainingQueue.push(queue[i]); break; }
+            }
+            localStorage.setItem('offlineTxQueue', JSON.stringify(remainingQueue));
+            if (remainingQueue.length < queue.length) syncData();
+        }
+        window.addEventListener('online', processOfflineQueue);
+
+        document.getElementById('btn-submit-tx').onclick = async () => {
+            const payload = {
+                source: "pwa", type: currentTxType, date: new Date().toISOString(),
+                amount: document.getElementById('input-amount').value,
+                accountFrom: currentTxType === 'Expense' ? document.getElementById('input-account').value : "",
+                accountTo: currentTxType === 'Income' ? document.getElementById('input-account').value : "",
+                category: document.getElementById('input-category').value,
+                description: document.getElementById('input-desc').value
+            };
+            if (!payload.amount || payload.amount <= 0) return alert("Введіть суму");
+            document.getElementById('btn-submit-tx').disabled = true;
+            
+            if (!navigator.onLine) {
+                let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
+                q.push(payload); localStorage.setItem('offlineTxQueue', JSON.stringify(q));
+                addModal.classList.add('hidden');
+                document.getElementById('btn-submit-tx').disabled = false;
+                return syncData();
+            }
+            try {
+                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                addModal.classList.add('hidden');
+                document.getElementById('input-amount').value = ''; document.getElementById('input-desc').value = '';
+                syncData();
+            } finally { document.getElementById('btn-submit-tx').disabled = false; }
+        };
+
+        const editModal = document.getElementById('edit-modal');
+        function openEdit(id) {
+            const tx = globalTransactions.find(t => t.id === id);
+            if(!tx) return;
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-desc').value = tx.description;
+            document.getElementById('edit-amount').value = tx.amount > 0 ? tx.amount : '';
+            editModal.classList.remove('hidden');
+        }
+
+        document.getElementById('btn-submit-edit').onclick = async () => {
+            if (!navigator.onLine) return alert("Редагування Inbox можливе тільки онлайн.");
+            const btn = document.getElementById('btn-submit-edit');
+            const payload = { action: "edit", id: document.getElementById('edit-id').value, amount: document.getElementById('edit-amount').value, category: document.getElementById('edit-category').value, description: document.getElementById('edit-desc').value };
+            if (!payload.amount || payload.amount <= 0) return alert("Введіть суму");
+            btn.textContent = "Збереження..."; btn.disabled = true;
+
+            try {
+                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                if ((await res.json()).status === "success") { editModal.classList.add('hidden'); syncData(); }
+            } catch (err) { alert("Помилка мережі"); } 
+            finally { btn.textContent = "Оновити"; btn.disabled = false; }
+        };
+    </script>
+</body>
+</html>
