@@ -81,8 +81,12 @@
     </div>
 
     <script>
+        <script>
         const PIN = "1234";
         let currentPin = "";
+        
+        // ВСТАВ СВІЙ URL ВІД APPS SCRIPT МІЖ ЛАПКАМИ
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyh7ShRAwGZCVRik_3WO5D1hleI_DhTejhYbTEgtW0NoO5zHEwRv-RsDqpPLbZtPw9IIQ/exec"; 
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
@@ -120,6 +124,7 @@
                         document.getElementById('auth-screen').classList.add('hidden');
                         document.getElementById('app-screen').classList.remove('hidden');
                         document.getElementById('app-screen').classList.add('flex');
+                        syncData(); // Автоматично підтягує базу при успішному вході
                     } else {
                         currentPin = "";
                         updatePinUI();
@@ -135,6 +140,49 @@
                 dot.classList.toggle('bg-gray-700', i >= currentPin.length);
             });
         }
+
+        async function syncData() {
+            const btn = document.getElementById('btn-sync');
+            btn.textContent = "Оновлення...";
+            
+            try {
+                const res = await fetch(WEB_APP_URL);
+                const data = await res.json();
+                
+                if(data.status === "success") {
+                    document.querySelector('.text-4xl.font-bold').textContent = data.balance;
+                    
+                    const txContainer = document.querySelector('.space-y-3');
+                    txContainer.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>';
+                    
+                    if (data.transactions.length === 0) {
+                        txContainer.innerHTML += `<div class="bg-gray-800/50 rounded-2xl p-4 text-center text-gray-500 text-sm border border-gray-800">Немає транзакцій.</div>`;
+                    } else {
+                        data.transactions.forEach(tx => {
+                            const isExpense = tx.type === 'Expense';
+                            const sign = isExpense ? '-' : '+';
+                            const color = isExpense ? 'text-gray-100' : 'text-green-400';
+                            
+                            txContainer.innerHTML += `
+                            <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border border-gray-800">
+                                <div>
+                                    <p class="font-medium text-gray-200">${tx.description}</p>
+                                    <p class="text-xs text-gray-500 mt-1">${tx.category} • ${tx.date}</p>
+                                </div>
+                                <p class="font-bold ${color}">${sign}${parseFloat(tx.amount).toFixed(2)}</p>
+                            </div>`;
+                        });
+                    }
+                }
+            } catch (err) {
+                alert("Помилка: " + err.message);
+            } finally {
+                btn.textContent = "Синхронізувати";
+            }
+        }
+
+        document.getElementById('btn-sync').addEventListener('click', syncData);
+    </script>
     </script>
 </body>
 </html>
