@@ -40,7 +40,6 @@
             <button id="btn-sync" class="text-blue-400 font-semibold text-sm py-1 px-2 bg-blue-500/10 rounded-lg active:bg-blue-500/20 transition-colors">Синхронізувати</button>
         </header>
         
-        <!-- View: Overview -->
         <main id="view-overview" class="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar">
             <div class="bg-gray-800 p-6 rounded-3xl shadow-lg border border-gray-700/50 relative overflow-hidden">
                 <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
@@ -53,7 +52,6 @@
             <div class="space-y-3" id="transactions-container"></div>
         </main>
 
-        <!-- View: Inbox -->
         <main id="view-inbox" class="hidden flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-gray-900">
             <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 mb-4">
                 <p class="text-yellow-400 text-sm font-medium">Транзакції, що потребують уточнення або спліту.</p>
@@ -61,7 +59,6 @@
             <div class="space-y-3" id="inbox-container"></div>
         </main>
 
-        <!-- View: Analytics -->
         <main id="view-analytics" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar bg-gray-900">
             <div class="flex items-center justify-between bg-gray-800 rounded-2xl p-1 shadow-sm border border-gray-700/50">
                 <button onclick="changePeriodOffset(-1)" id="btn-period-prev" class="p-3 text-gray-400 active:bg-gray-700 rounded-xl transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
@@ -71,7 +68,6 @@
                 </button>
                 <button onclick="changePeriodOffset(1)" id="btn-period-next" class="p-3 text-gray-400 active:bg-gray-700 rounded-xl transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
             </div>
-            
             <div class="relative w-56 h-56 mx-auto my-4">
                 <canvas id="analytics-chart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
@@ -95,85 +91,49 @@
         </nav>
     </div>
 
-    <!-- Period Selection Modal -->
+    <!-- Modals -->
     <div id="period-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
-        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb transform transition-transform border-t border-gray-800 max-h-[90vh] overflow-y-auto">
-            <h2 class="text-xl font-bold mb-6 text-center safe-pt mt-4">Проміжок часу</h2>
-            
+        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pt safe-pb transform transition-transform border-t border-gray-800 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold mb-6 text-center mt-4">Проміжок часу</h2>
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="setPeriodType('all')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
-                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span class="text-sm font-semibold">Весь час</span>
-                </button>
-                <button onclick="setPeriodType('year')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
-                    <span class="text-xl font-bold text-gray-400">365</span>
-                    <span class="text-sm font-semibold">Рік</span>
-                </button>
-                <button onclick="setPeriodType('month')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
-                    <span class="text-xl font-bold text-gray-400">30</span>
-                    <span class="text-sm font-semibold">Місяць</span>
-                </button>
-                <button onclick="setPeriodType('week')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
-                    <span class="text-xl font-bold text-gray-400">7</span>
-                    <span class="text-sm font-semibold">Тиждень</span>
-                </button>
-                <button onclick="setPeriodType('day')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
-                    <span class="text-xl font-bold text-gray-400">1</span>
-                    <span class="text-sm font-semibold">День</span>
-                </button>
-                <button onclick="toggleCustomDates()" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
-                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                    <span class="text-sm font-semibold">Діапазон</span>
-                </button>
+                <button onclick="setPeriodType('all')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-sm font-semibold">Весь час</span></button>
+                <button onclick="setPeriodType('year')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-xl font-bold text-gray-400">365</span><span class="text-sm font-semibold">Рік</span></button>
+                <button onclick="setPeriodType('month')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-xl font-bold text-gray-400">30</span><span class="text-sm font-semibold">Місяць</span></button>
+                <button onclick="setPeriodType('week')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-xl font-bold text-gray-400">7</span><span class="text-sm font-semibold">Тиждень</span></button>
+                <button onclick="setPeriodType('day')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-xl font-bold text-gray-400">1</span><span class="text-sm font-semibold">День</span></button>
+                <button onclick="toggleCustomDates()" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-sm font-semibold">Діапазон</span></button>
             </div>
-
             <div id="custom-date-inputs" class="hidden flex-col gap-3 mb-6 bg-gray-800 p-4 rounded-2xl border border-gray-700">
-                <div class="flex items-center gap-3">
-                    <span class="text-gray-400 text-sm w-8">Від</span>
-                    <input type="date" id="date-start" class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white">
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-gray-400 text-sm w-8">До</span>
-                    <input type="date" id="date-end" class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white">
-                </div>
+                <div class="flex items-center gap-3"><span class="text-gray-400 text-sm w-8">Від</span><input type="date" id="date-start" class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white"></div>
+                <div class="flex items-center gap-3"><span class="text-gray-400 text-sm w-8">До</span><input type="date" id="date-end" class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white"></div>
                 <button onclick="setPeriodType('custom')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-2 active:bg-blue-700">Застосувати</button>
             </div>
-
             <button onclick="document.getElementById('period-modal').classList.add('hidden')" class="w-full text-blue-400 font-semibold py-4">Скасувати</button>
         </div>
     </div>
 
-    <!-- Edit / Split Modal -->
+    <!-- Edit Modal -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
         <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 safe-pt mt-4">
-                <h2 class="text-xl font-bold text-yellow-500">Обробка Inbox</h2>
+                <h2 class="text-xl font-bold text-yellow-500">Редагування</h2>
                 <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
             <div class="space-y-4">
                 <input type="hidden" id="edit-id">
-                <div>
-                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Опис</label>
-                    <input type="text" id="edit-desc" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Сума (PLN)</label>
-                    <input type="number" id="edit-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-yellow-700 rounded-xl px-4 py-3 text-2xl font-bold text-center text-white">
-                </div>
+                <div><label class="text-xs text-gray-400 ml-1 mb-1 block">Опис</label><input type="text" id="edit-desc" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300"></div>
+                <div><label class="text-xs text-gray-400 ml-1 mb-1 block">Сума (PLN)</label><input type="number" id="edit-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-yellow-700 rounded-xl px-4 py-3 text-2xl font-bold text-center text-white"></div>
                 <div>
                     <label class="text-xs text-gray-400 ml-1 mb-1 block">Категорія</label>
                     <select id="edit-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
                         <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
                     </select>
                 </div>
-
-                <!-- Split section -->
                 <div class="border-t border-gray-800 pt-4">
                     <button type="button" onclick="toggleSplitMode()" class="w-full py-2 text-sm font-semibold text-blue-400 bg-blue-500/10 rounded-xl active:bg-blue-500/20">Розбити на кілька частин (Спліт)</button>
                     <div id="split-container" class="hidden space-y-3 mt-3"></div>
                     <button type="button" id="btn-add-split-row" onclick="addSplitRow()" class="hidden w-full py-2 text-xs font-semibold text-gray-300 bg-gray-800 rounded-xl mt-2">+ Додати частину</button>
                 </div>
-
                 <button id="btn-submit-edit" class="w-full bg-yellow-600 text-white font-bold py-4 rounded-xl mt-4 active:bg-yellow-700">Зберегти</button>
             </div>
         </div>
@@ -190,11 +150,22 @@
                 <div class="flex bg-gray-800 p-1 rounded-xl">
                     <button id="type-expense" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-gray-700 text-white shadow tx-type-btn">Витрата</button>
                     <button id="type-income" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 tx-type-btn">Дохід</button>
+                    <button id="type-transfer" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 tx-type-btn">Переказ</button>
                 </div>
                 <input type="number" id="input-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-4 text-3xl font-bold text-center text-white">
-                <select id="input-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
-                    <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
-                </select>
+                
+                <div id="fields-regular" class="grid grid-cols-2 gap-3">
+                    <select id="input-account" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none"><option value="Everyday">Everyday</option><option value="Заощадження">Заощадження</option><option value="Готівка">Готівка</option></select>
+                    <select id="input-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
+                        <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
+                    </select>
+                </div>
+                
+                <div id="fields-transfer" class="hidden grid grid-cols-2 gap-3">
+                    <select id="input-account-from" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none"><option value="Everyday">З: Everyday</option><option value="Заощадження">З: Заощадження</option><option value="Готівка">З: Готівка</option></select>
+                    <select id="input-account-to" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none"><option value="Заощадження">На: Заощадження</option><option value="Everyday">На: Everyday</option><option value="Готівка">На: Готівка</option></select>
+                </div>
+
                 <input type="text" id="input-desc" placeholder="Коментар" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white">
                 <button id="btn-submit-tx" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-2 active:bg-blue-700">Зберегти</button>
             </div>
@@ -202,13 +173,41 @@
     </div>
 
     <script>
-        const PIN = "1233";
+        const PIN = "1232";
         let currentPin = "";
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbysKTFjH5vvIcYyBFByPl314qOSLj6QuSzmBtzkhd4hTeDr8xcDma_h_hz87LvnfZyLOg/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbysKTFjH5vvIcYyBFByPl314qOSLj6QuSzmBtzkhd4hTeDr8xcDma_h_hz87LvnfZyLOg/exec"; // <-- ВСТАВ URL СЮДИ
 
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(console.error);
 
-        // Auth
+        function loginSuccess() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('app-screen').classList.add('flex');
+            syncData(); processOfflineQueue();
+        }
+
+        async function handleFaceID() {
+            if (!window.PublicKeyCredential) return alert("Face ID не підтримується браузером.");
+            try {
+                const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+                await navigator.credentials.get({ publicKey: { challenge, userVerification: "required" } });
+                loginSuccess();
+            } catch (err) {
+                try {
+                    const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+                    const userId = new Uint8Array(16); crypto.getRandomValues(userId);
+                    await navigator.credentials.create({
+                        publicKey: {
+                            challenge, rp: { name: "Finance PWA" }, user: { id: userId, name: "owner", displayName: "Власник" },
+                            pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+                            authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" }
+                        }
+                    });
+                    loginSuccess();
+                } catch (e) { alert("Помилка Face ID: скасовано або не налаштовано."); }
+            }
+        }
+
         const numpad = document.getElementById('numpad');
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 'ID', 0, 'C'].forEach(key => {
             const btn = document.createElement('button');
@@ -216,20 +215,14 @@
             btn.innerHTML = key === 'ID' ? `<span class="text-sm text-blue-400 font-bold">FaceID</span>` : key === 'C' ? `<span class="text-xl font-bold text-red-400">C</span>` : key;
             btn.onclick = () => {
                 if (key === 'C') currentPin = currentPin.slice(0, -1);
-                else if (key === 'ID') return;
+                else if (key === 'ID') return handleFaceID();
                 else if (currentPin.length < 4) currentPin += key;
+                
                 document.querySelectorAll('.pin-dot').forEach((dot, i) => dot.classList.toggle('bg-blue-500', i < currentPin.length));
                 if (currentPin.length === 4) {
                     setTimeout(() => {
-                        if (currentPin === PIN) {
-                            document.getElementById('auth-screen').classList.add('hidden');
-                            document.getElementById('app-screen').classList.remove('hidden');
-                            document.getElementById('app-screen').classList.add('flex');
-                            syncData(); processOfflineQueue();
-                        } else {
-                            currentPin = ""; document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('bg-blue-500'));
-                            if (navigator.vibrate) navigator.vibrate(200);
-                        }
+                        if (currentPin === PIN) { currentPin = ""; loginSuccess(); } 
+                        else { currentPin = ""; document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('bg-blue-500')); if (navigator.vibrate) navigator.vibrate(200); }
                     }, 100);
                 }
             };
@@ -247,8 +240,7 @@
 
         let globalTransactions = [];
         async function syncData() {
-            const btn = document.getElementById('btn-sync');
-            btn.textContent = "Оновл...";
+            const btn = document.getElementById('btn-sync'); btn.textContent = "Оновл...";
             try {
                 if (!navigator.onLine) return btn.textContent = "Офлайн";
                 const res = await fetch(WEB_APP_URL);
@@ -276,15 +268,20 @@
 
             globalTransactions.forEach(tx => {
                 const isExp = tx.type === 'Expense';
+                const isTransfer = tx.type === 'Transfer';
                 const isInbox = tx.category === 'Нерозподілене' || tx.category === '⚠️ Очікує конвертації';
+                const color = isTransfer ? 'text-blue-400' : (isExp ? 'text-gray-100' : 'text-green-400');
+                const sign = isTransfer ? '⇄ ' : (isExp ? '-' : '+');
+                const desc = isTransfer ? `З ${tx.accountFrom} на ${tx.accountTo}` : (tx.description || tx.category);
+
                 const html = `
                 <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border ${isInbox ? 'border-yellow-600/30' : 'border-gray-800'} active:bg-gray-700 cursor-pointer" 
                      onclick="openEdit('${tx.id}')">
                     <div>
-                        <p class="font-medium text-gray-200">${tx.description || tx.category}</p>
+                        <p class="font-medium text-gray-200">${desc}</p>
                         <p class="text-xs ${isInbox ? 'text-yellow-500' : 'text-gray-500'} mt-1">${tx.category} • ${tx.date}</p>
                     </div>
-                    <p class="font-bold ${isExp ? 'text-gray-100' : 'text-green-400'}">${isExp ? '-' : '+'}${parseFloat(tx.amount).toFixed(2)}</p>
+                    <p class="font-bold ${color}">${sign}${parseFloat(tx.amount).toFixed(2)}</p>
                 </div>`;
                 if (isInbox) { inxCont.innerHTML += html; inxCount++; } else txCont.innerHTML += html;
             });
@@ -300,9 +297,7 @@
             const btnAdd = document.getElementById('btn-add-split-row');
             container.classList.toggle('hidden', !isSplitActive);
             btnAdd.classList.toggle('hidden', !isSplitActive);
-            if (isSplitActive && container.children.length === 0) {
-                addSplitRow(); addSplitRow();
-            }
+            if (isSplitActive && container.children.length === 0) { addSplitRow(); addSplitRow(); }
         }
 
         function addSplitRow() {
@@ -324,128 +319,78 @@
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-desc').value = tx.description;
             document.getElementById('edit-amount').value = tx.amount;
-            isSplitActive = false;
-            document.getElementById('split-container').innerHTML = '';
+            isSplitActive = false; document.getElementById('split-container').innerHTML = '';
             document.getElementById('split-container').classList.add('hidden');
             document.getElementById('btn-add-split-row').classList.add('hidden');
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
         document.getElementById('btn-submit-edit').onclick = async () => {
-            const id = document.getElementById('edit-id').value;
-            const desc = document.getElementById('edit-desc').value;
-            
+            const id = document.getElementById('edit-id').value; const desc = document.getElementById('edit-desc').value;
             if (isSplitActive) {
-                const rows = document.querySelectorAll('#split-container > div');
-                let splits = [];
-                let total = 0;
+                const rows = document.querySelectorAll('#split-container > div'); let splits = []; let total = 0;
                 rows.forEach(r => {
-                    const amt = parseFloat(r.querySelector('.split-amount').value) || 0;
-                    const cat = r.querySelector('.split-cat').value;
+                    const amt = parseFloat(r.querySelector('.split-amount').value) || 0; const cat = r.querySelector('.split-cat').value;
                     if (amt > 0) { splits.push({ amount: amt, category: cat, description: desc }); total += amt; }
                 });
                 if (splits.length < 2) return alert("Потрібно мінімум 2 частини для спліту");
-                
                 const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "split", id, splits }) });
                 if ((await res.json()).status === "success") { document.getElementById('edit-modal').classList.add('hidden'); syncData(); }
             } else {
-                const amount = document.getElementById('edit-amount').value;
-                const cat = document.getElementById('edit-category').value;
+                const amount = document.getElementById('edit-amount').value; const cat = document.getElementById('edit-category').value;
                 const p = { action: "edit", id, amount, category: cat, description: desc };
                 const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) });
                 if ((await res.json()).status === "success") { document.getElementById('edit-modal').classList.add('hidden'); syncData(); }
             }
         };
 
-        // Analytics & Periods
-        let chartInstance = null; let excludedCats = new Set();
-        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1'];
-        let actPeriod = 'month'; let pOffset = 0;
-        const monthNom = ["Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"];
+        // Analytics
+        let chartInstance = null; let excludedCats = new Set(); const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1'];
+        let actPeriod = 'month'; let pOffset = 0; const monthNom = ["Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"];
 
         function toggleCustomDates() { document.getElementById('custom-date-inputs').classList.toggle('hidden'); document.getElementById('custom-date-inputs').classList.toggle('flex'); }
-
         function setPeriodType(type) { actPeriod = type; pOffset = 0; document.getElementById('period-modal').classList.add('hidden'); updateAnalytics(); }
         function changePeriodOffset(dir) { if (actPeriod === 'all' || actPeriod === 'custom') return; pOffset += dir; updateAnalytics(); }
 
         function getPeriodRange() {
             const now = new Date(); const y = now.getFullYear(); const m = now.getMonth(); const d = now.getDate();
             if (actPeriod === 'all') return { start: new Date(2000,0,1), end: new Date(2100,0,1), label: 'Весь час' };
-            if (actPeriod === 'year') {
-                const start = new Date(y + pOffset, 0, 1); const end = new Date(y + pOffset, 11, 31, 23, 59, 59);
-                return { start, end, label: `${y + pOffset} рік` };
-            }
-            if (actPeriod === 'month') {
-                const start = new Date(y, m + pOffset, 1); const end = new Date(y, m + pOffset + 1, 0, 23, 59, 59);
-                return { start, end, label: `${monthNom[start.getMonth()]} ${start.getFullYear()}` };
-            }
-            if (actPeriod === 'week') {
-                const dayIdx = now.getDay() === 0 ? 6 : now.getDay() - 1;
-                const start = new Date(y, m, d - dayIdx + (pOffset * 7));
-                const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59);
-                return { start, end, label: 'Тиждень' };
-            }
-            if (actPeriod === 'day') {
-                const start = new Date(y, m, d + pOffset); const end = new Date(y, m, d + pOffset, 23, 59, 59);
-                return { start, end, label: `${start.getDate()} ${monthNom[start.getMonth()]}` };
-            }
-            if (actPeriod === 'custom') {
-                const sV = document.getElementById('date-start').value; const eV = document.getElementById('date-end').value;
-                const start = sV ? new Date(sV) : new Date(2000,0,1); const end = eV ? new Date(eV) : new Date(); end.setHours(23, 59, 59);
-                return { start, end, label: 'Кастом' };
-            }
+            if (actPeriod === 'year') { const start = new Date(y + pOffset, 0, 1); const end = new Date(y + pOffset, 11, 31, 23, 59, 59); return { start, end, label: `${y + pOffset} рік` }; }
+            if (actPeriod === 'month') { const start = new Date(y, m + pOffset, 1); const end = new Date(y, m + pOffset + 1, 0, 23, 59, 59); return { start, end, label: `${monthNom[start.getMonth()]} ${start.getFullYear()}` }; }
+            if (actPeriod === 'week') { const dayIdx = now.getDay() === 0 ? 6 : now.getDay() - 1; const start = new Date(y, m, d - dayIdx + (pOffset * 7)); const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59); return { start, end, label: 'Тиждень' }; }
+            if (actPeriod === 'day') { const start = new Date(y, m, d + pOffset); const end = new Date(y, m, d + pOffset, 23, 59, 59); return { start, end, label: `${start.getDate()} ${monthNom[start.getMonth()]}` }; }
+            if (actPeriod === 'custom') { const sV = document.getElementById('date-start').value; const eV = document.getElementById('date-end').value; const start = sV ? new Date(sV) : new Date(2000,0,1); const end = eV ? new Date(eV) : new Date(); end.setHours(23, 59, 59); return { start, end, label: 'Кастом' }; }
         }
 
         function parseTxDate(dateStr) {
-            if (!dateStr) return new Date();
-            if (dateStr.includes('T')) return new Date(dateStr);
-            const parts = dateStr.split(' ');
-            if (parts.length > 0 && parts[0].includes('.')) {
-                const [day, month] = parts[0].split('.');
-                return new Date(new Date().getFullYear(), parseInt(month) - 1, parseInt(day));
-            }
+            if (!dateStr) return new Date(); if (dateStr.includes('T')) return new Date(dateStr);
+            const parts = dateStr.split(' '); if (parts.length > 0 && parts[0].includes('.')) { const [day, month] = parts[0].split('.'); return new Date(new Date().getFullYear(), parseInt(month) - 1, parseInt(day)); }
             return new Date();
         }
 
         function updateAnalytics() {
-            const range = getPeriodRange();
-            document.getElementById('period-label').textContent = range.label;
-            const btnPrev = document.getElementById('btn-period-prev');
-            const btnNext = document.getElementById('btn-period-next');
-            const noArrows = (actPeriod === 'all' || actPeriod === 'custom');
-            btnPrev.style.opacity = noArrows ? '0.3' : '1'; btnNext.style.opacity = noArrows ? '0.3' : '1';
+            const range = getPeriodRange(); document.getElementById('period-label').textContent = range.label;
+            const btnPrev = document.getElementById('btn-period-prev'); const btnNext = document.getElementById('btn-period-next');
+            const noArrows = (actPeriod === 'all' || actPeriod === 'custom'); btnPrev.style.opacity = noArrows ? '0.3' : '1'; btnNext.style.opacity = noArrows ? '0.3' : '1';
 
             let expenses = globalTransactions.filter(tx => tx.type === 'Expense' && parseTxDate(tx.date) >= range.start && parseTxDate(tx.date) <= range.end);
-
             const totals = {}; expenses.forEach(tx => totals[tx.category || 'Інше'] = (totals[tx.category || 'Інше'] || 0) + parseFloat(tx.amount));
             const labels = []; const data = []; let activeSum = 0;
             Object.keys(totals).forEach(c => { if (!excludedCats.has(c)) activeSum += totals[c]; });
-            Object.keys(totals).sort((a,b) => totals[b]-totals[a]).forEach(cat => {
-                if (!excludedCats.has(cat)) { labels.push(cat); data.push(totals[cat]); }
-            });
+            Object.keys(totals).sort((a,b) => totals[b]-totals[a]).forEach(cat => { if (!excludedCats.has(cat)) { labels.push(cat); data.push(totals[cat]); } });
 
-            document.getElementById('analytics-total').textContent = activeSum.toFixed(2);
-            renderChart(labels, data);
+            document.getElementById('analytics-total').textContent = activeSum.toFixed(2); renderChart(labels, data);
             
             const cont = document.getElementById('analytics-categories'); cont.innerHTML = '';
             Object.entries(totals).sort((a,b) => b[1]-a[1]).forEach(([cat, sum], i) => {
-                const isExc = excludedCats.has(cat); const color = colors[i % colors.length];
-                const pct = (!isExc && activeSum > 0) ? ((sum / activeSum) * 100).toFixed(1) : 0;
-                cont.innerHTML += `
-                <div class="flex justify-between items-center bg-gray-800/40 p-3 rounded-xl border border-gray-700 cursor-pointer ${isExc ? 'opacity-40 grayscale' : ''}" onclick="toggleCat('${cat}')">
-                    <div class="flex items-center gap-3"><div class="w-3 h-3 rounded-full" style="background-color: ${isExc ? '#4b5563' : color}"></div><span class="text-sm font-medium text-gray-200">${cat}</span></div>
-                    <div class="text-right">${!isExc ? `<span class="text-xs text-gray-400 mr-2">${pct}%</span>` : ''}<span class="text-sm font-bold text-gray-100">${sum.toFixed(2)}</span></div>
-                </div>`;
+                const isExc = excludedCats.has(cat); const color = colors[i % colors.length]; const pct = (!isExc && activeSum > 0) ? ((sum / activeSum) * 100).toFixed(1) : 0;
+                cont.innerHTML += `<div class="flex justify-between items-center bg-gray-800/40 p-3 rounded-xl border border-gray-700 cursor-pointer ${isExc ? 'opacity-40 grayscale' : ''}" onclick="toggleCat('${cat}')"><div class="flex items-center gap-3"><div class="w-3 h-3 rounded-full" style="background-color: ${isExc ? '#4b5563' : color}"></div><span class="text-sm font-medium text-gray-200">${cat}</span></div><div class="text-right">${!isExc ? `<span class="text-xs text-gray-400 mr-2">${pct}%</span>` : ''}<span class="text-sm font-bold text-gray-100">${sum.toFixed(2)}</span></div></div>`;
             });
         }
 
         function renderChart(labels, data) {
-            const ctx = document.getElementById('analytics-chart');
-            if (chartInstance) chartInstance.destroy();
-            if (data.length === 0) {
-                chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Немає'], datasets: [{ data: [1], backgroundColor: ['#374151'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } } } });
-                return;
-            }
+            const ctx = document.getElementById('analytics-chart'); if (chartInstance) chartInstance.destroy();
+            if (data.length === 0) { chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Немає'], datasets: [{ data: [1], backgroundColor: ['#374151'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } } } }); return; }
             chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false } } } });
         }
         function toggleCat(cat) { excludedCats.has(cat) ? excludedCats.delete(cat) : excludedCats.add(cat); updateAnalytics(); }
@@ -453,17 +398,36 @@
         // Add Modal
         let currentTxType = 'Expense';
         document.getElementById('btn-add-modal').onclick = () => document.getElementById('add-modal').classList.remove('hidden');
+        
         document.querySelectorAll('.tx-type-btn').forEach(btn => btn.onclick = (e) => {
             document.querySelectorAll('.tx-type-btn').forEach(b => { b.classList.replace('bg-gray-700', 'text-gray-400'); b.classList.remove('text-white', 'shadow'); });
             e.target.classList.replace('text-gray-400', 'bg-gray-700'); e.target.classList.add('text-white', 'shadow');
-            currentTxType = e.target.textContent === 'Витрата' ? 'Expense' : 'Income';
+            
+            const txt = e.target.textContent;
+            currentTxType = txt === 'Витрата' ? 'Expense' : (txt === 'Дохід' ? 'Income' : 'Transfer');
+            
+            if (currentTxType === 'Transfer') {
+                document.getElementById('fields-regular').classList.add('hidden');
+                document.getElementById('fields-transfer').classList.remove('hidden');
+            } else {
+                document.getElementById('fields-transfer').classList.add('hidden');
+                document.getElementById('fields-regular').classList.remove('hidden');
+            }
         });
 
         document.getElementById('btn-submit-tx').onclick = async () => {
-            const p = { source: "pwa", type: currentTxType, date: new Date().toISOString(), amount: document.getElementById('input-amount').value, accountFrom: currentTxType === 'Expense' ? 'Everyday' : '', accountTo: currentTxType === 'Income' ? 'Everyday' : '', category: document.getElementById('input-category').value, description: document.getElementById('input-desc').value };
+            const p = { 
+                source: "pwa", type: currentTxType, date: new Date().toISOString(), amount: document.getElementById('input-amount').value, 
+                accountFrom: currentTxType === 'Transfer' ? document.getElementById('input-account-from').value : (currentTxType === 'Expense' ? document.getElementById('input-account').value : ''), 
+                accountTo: currentTxType === 'Transfer' ? document.getElementById('input-account-to').value : (currentTxType === 'Income' ? document.getElementById('input-account').value : ''), 
+                category: currentTxType === 'Transfer' ? 'Переказ' : document.getElementById('input-category').value, description: document.getElementById('input-desc').value 
+            };
             if (!p.amount || p.amount <= 0) return alert("Введіть суму");
-            try { await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) }); document.getElementById('add-modal').classList.add('hidden'); syncData(); } catch(e){}
+            document.getElementById('btn-submit-tx').disabled = true;
+            if (!navigator.onLine) { let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; q.push(p); localStorage.setItem('offlineTxQueue', JSON.stringify(q)); document.getElementById('add-modal').classList.add('hidden'); document.getElementById('btn-submit-tx').disabled = false; return syncData(); }
+            try { await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) }); document.getElementById('add-modal').classList.add('hidden'); syncData(); } finally { document.getElementById('btn-submit-tx').disabled = false; }
         };
+        
         async function processOfflineQueue() {
             let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; if (q.length === 0) return; let rem = [];
             for (let i of q) { try { if ((await (await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(i) })).json()).status !== "success") rem.push(i); } catch { rem.push(i); break; } }
