@@ -9,6 +9,7 @@
     <title>Finance Tracker</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>tailwind.config = { darkMode: 'class' };</script>
     <style>
         .safe-pt { padding-top: max(1.5rem, env(safe-area-inset-top)); }
@@ -63,6 +64,26 @@
             <div class="space-y-3" id="inbox-container"></div>
         </main>
 
+        <!-- View: Analytics -->
+        <main id="view-analytics" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar bg-gray-900">
+            <div class="flex bg-gray-800 p-1 rounded-xl">
+                <button onclick="setPeriod('today')" id="period-today" class="period-btn flex-1 py-1.5 text-xs font-semibold rounded-lg text-gray-400">Сьогодні</button>
+                <button onclick="setPeriod('week')" id="period-week" class="period-btn flex-1 py-1.5 text-xs font-semibold rounded-lg text-gray-400">Тиждень</button>
+                <button onclick="setPeriod('month')" id="period-month" class="period-btn flex-1 py-1.5 text-xs font-semibold rounded-lg bg-gray-700 text-white shadow">Місяць</button>
+                <button onclick="setPeriod('all')" id="period-all" class="period-btn flex-1 py-1.5 text-xs font-semibold rounded-lg text-gray-400">Всі</button>
+            </div>
+            
+            <div class="relative w-56 h-56 mx-auto my-4">
+                <canvas id="analytics-chart"></canvas>
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
+                    <span class="text-[10px] text-gray-500 uppercase tracking-widest">Витрати</span>
+                    <span id="analytics-total" class="text-xl font-bold text-white">0.00</span>
+                </div>
+            </div>
+            
+            <div class="space-y-2" id="analytics-categories"></div>
+        </main>
+
         <!-- FAB Add Button -->
         <button id="btn-add-modal" class="absolute bottom-24 right-4 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-600/30 active:bg-blue-700 transition-transform active:scale-95 z-20">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
@@ -79,10 +100,14 @@
                 <span class="text-[10px] font-bold">Inbox</span>
                 <span id="inbox-badge" class="absolute top-1 right-2 flex h-2.5 w-2.5 rounded-full bg-red-500 hidden border-2 border-gray-900"></span>
             </button>
+            <button id="nav-analytics" class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16 nav-btn" onclick="switchTab('analytics')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                <span class="text-[10px] font-bold">Аналітика</span>
+            </button>
         </nav>
     </div>
 
-    <!-- Modals (Add & Edit) -->
+    <!-- Modals -->
     <!-- Add Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
         <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb transform transition-transform border-t border-gray-800">
@@ -108,7 +133,7 @@
         </div>
     </div>
 
-    <!-- Edit Modal (Inbox) -->
+    <!-- Edit Modal -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
         <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb transform transition-transform border-t border-gray-800">
             <div class="flex justify-between items-center mb-6">
@@ -118,7 +143,7 @@
             <div class="space-y-4">
                 <input type="hidden" id="edit-id">
                 <div>
-                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Оригінальний опис</label>
+                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Опис</label>
                     <input type="text" id="edit-desc" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300">
                 </div>
                 <div>
@@ -128,22 +153,16 @@
                 <div>
                     <label class="text-xs text-gray-400 ml-1 mb-1 block">Категорія</label>
                     <select id="edit-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
-                        <option value="Продукти">Продукти</option>
-                        <option value="Транспорт">Транспорт</option>
-                        <option value="Житло">Житло</option>
-                        <option value="Розваги">Розваги</option>
-                        <option value="Підписки">Підписки</option>
-                        <option value="Здоров'я">Здоров'я</option>
-                        <option value="Інше">Інше</option>
+                        <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
                     </select>
                 </div>
-                <button id="btn-submit-edit" class="w-full bg-yellow-600 text-white font-bold py-4 rounded-xl mt-4 active:bg-yellow-700">Оновити транзакцію</button>
+                <button id="btn-submit-edit" class="w-full bg-yellow-600 text-white font-bold py-4 rounded-xl mt-4 active:bg-yellow-700">Оновити</button>
             </div>
         </div>
     </div>
 
     <script>
-        const PIN = "1235";
+        const PIN = "1236";
         let currentPin = "";
         
         // ВСТАВ СВІЙ АКТУАЛЬНИЙ URL ТУТ!
@@ -153,7 +172,7 @@
             window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
         }
 
-        // Auth Logic
+        // Init Auth Numpad
         const numpad = document.getElementById('numpad');
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 'ID', 0, 'C'].forEach(key => {
             const btn = document.createElement('button');
@@ -185,28 +204,22 @@
             numpad.appendChild(btn);
         });
 
-        // Tab Navigation Logic
+        // Tab Switcher
         function switchTab(tab) {
-            const vOverview = document.getElementById('view-overview');
-            const vInbox = document.getElementById('view-inbox');
-            const nOverview = document.getElementById('nav-overview');
-            const nInbox = document.getElementById('nav-inbox');
-            const title = document.getElementById('header-title');
+            const views = ['overview', 'inbox', 'analytics'];
+            const titles = { 'overview': 'Огляд', 'inbox': 'Inbox', 'analytics': 'Аналітика' };
             
-            if (tab === 'overview') {
-                vOverview.classList.remove('hidden'); vInbox.classList.add('hidden');
-                nOverview.classList.replace('text-gray-500', 'text-blue-400');
-                nInbox.classList.replace('text-blue-400', 'text-gray-500');
-                title.textContent = "Огляд";
-            } else {
-                vOverview.classList.add('hidden'); vInbox.classList.remove('hidden');
-                nInbox.classList.replace('text-gray-500', 'text-blue-400');
-                nOverview.classList.replace('text-blue-400', 'text-gray-500');
-                title.textContent = "Inbox";
-            }
+            views.forEach(v => {
+                document.getElementById(`view-${v}`).classList.toggle('hidden', v !== tab);
+                const nav = document.getElementById(`nav-${v}`);
+                nav.classList.toggle('text-blue-400', v === tab);
+                nav.classList.toggle('text-gray-500', v !== tab);
+            });
+            document.getElementById('header-title').textContent = titles[tab];
+            if (tab === 'analytics') updateAnalytics();
         }
 
-        // Fetch & Render Data
+        // Fetch Data
         let globalTransactions = [];
         async function syncData() {
             const btn = document.getElementById('btn-sync');
@@ -220,6 +233,7 @@
                     document.getElementById('balance-display').textContent = data.balance;
                     globalTransactions = data.transactions;
                     renderTransactions();
+                    updateAnalytics();
                 }
             } catch (err) { console.error(err); } 
             finally { if (navigator.onLine) btn.textContent = "Синхронізувати"; }
@@ -235,14 +249,10 @@
             inxCont.innerHTML = '';
             let inboxCount = 0;
 
-            if (globalTransactions.length === 0) {
-                txCont.innerHTML += `<div class="bg-gray-800/50 rounded-2xl p-4 text-center text-gray-500 text-sm">Немає транзакцій.</div>`;
-                return;
-            }
+            if (globalTransactions.length === 0) return txCont.innerHTML += `<div class="bg-gray-800/50 rounded-2xl p-4 text-center text-gray-500 text-sm">Немає транзакцій.</div>`;
 
             globalTransactions.forEach(tx => {
                 const isExpense = tx.type === 'Expense';
-                const sign = isExpense ? '-' : '+';
                 const color = isExpense ? 'text-gray-100' : 'text-green-400';
                 const isInbox = tx.category === 'Нерозподілене' || tx.category === '⚠️ Очікує конвертації';
                 
@@ -253,26 +263,132 @@
                         <p class="font-medium text-gray-200">${tx.description || tx.category}</p>
                         <p class="text-xs ${isInbox ? 'text-yellow-500' : 'text-gray-500'} mt-1">${tx.category} • ${tx.date}</p>
                     </div>
-                    <p class="font-bold ${color}">${sign}${parseFloat(tx.amount).toFixed(2)}</p>
+                    <p class="font-bold ${color}">${isExpense ? '-' : '+'}${parseFloat(tx.amount).toFixed(2)}</p>
                 </div>`;
                 
-                if (isInbox) {
-                    inxCont.innerHTML += html;
-                    inboxCount++;
-                } else {
-                    txCont.innerHTML += html;
+                if (isInbox) { inxCont.innerHTML += html; inboxCount++; } else { txCont.innerHTML += html; }
+            });
+
+            badge.classList.toggle('hidden', inboxCount === 0);
+            if (inboxCount === 0) inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
+        }
+
+        // --- Analytics Logic ---
+        let chartInstance = null;
+        let currentPeriod = 'month';
+        let excludedCats = new Set();
+        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1'];
+
+        function parseTxDate(dateStr) {
+            if (!dateStr) return new Date();
+            if (dateStr.includes('T')) return new Date(dateStr); // From offline queue
+            const parts = dateStr.split(' ');
+            if (parts.length > 0 && parts[0].includes('.')) {
+                const [day, month] = parts[0].split('.');
+                return new Date(new Date().getFullYear(), parseInt(month) - 1, parseInt(day));
+            }
+            return new Date();
+        }
+
+        function setPeriod(p) {
+            currentPeriod = p;
+            document.querySelectorAll('.period-btn').forEach(b => {
+                b.classList.replace('bg-gray-700', 'text-gray-400');
+                b.classList.remove('text-white', 'shadow');
+            });
+            const active = document.getElementById(`period-${p}`);
+            active.classList.replace('text-gray-400', 'bg-gray-700');
+            active.classList.add('text-white', 'shadow');
+            updateAnalytics();
+        }
+
+        function updateAnalytics() {
+            const now = new Date();
+            let expenses = globalTransactions.filter(tx => tx.type === 'Expense');
+
+            // 1. Filter Period
+            expenses = expenses.filter(tx => {
+                if (currentPeriod === 'all') return true;
+                const d = parseTxDate(tx.date);
+                const diffDays = Math.ceil(Math.abs(now - d) / (1000 * 60 * 60 * 24));
+                
+                if (currentPeriod === 'today') return diffDays <= 1 && d.getDate() === now.getDate();
+                if (currentPeriod === 'week') return diffDays <= 7;
+                if (currentPeriod === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                return true;
+            });
+
+            // 2. Aggregate Categories
+            const totals = {};
+            expenses.forEach(tx => {
+                const cat = tx.category || 'Інше';
+                totals[cat] = (totals[cat] || 0) + parseFloat(tx.amount);
+            });
+
+            // 3. Render Chart
+            const labels = [];
+            const data = [];
+            let totalSum = 0;
+
+            Object.keys(totals).sort((a,b) => totals[b]-totals[a]).forEach((cat, i) => {
+                if (!excludedCats.has(cat)) {
+                    labels.push(cat);
+                    data.push(totals[cat]);
+                    totalSum += totals[cat];
                 }
             });
 
-            if (inboxCount > 0) {
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-                inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
-            }
+            document.getElementById('analytics-total').textContent = totalSum.toFixed(2);
+            renderChart(labels, data);
+            renderCatList(totals);
         }
 
-        // Add Modal Logic
+        function renderChart(labels, data) {
+            const ctx = document.getElementById('analytics-chart');
+            if (chartInstance) chartInstance.destroy();
+            
+            if (data.length === 0) {
+                chartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels: ['Немає даних'], datasets: [{ data: [1], backgroundColor: ['#374151'], borderWidth: 0 }] },
+                    options: { cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+                });
+                return;
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
+                options: { cutout: '80%', plugins: { legend: { display: false } } }
+            });
+        }
+
+        function renderCatList(totals) {
+            const cont = document.getElementById('analytics-categories');
+            cont.innerHTML = '';
+            
+            Object.entries(totals).sort((a,b) => b[1]-a[1]).forEach(([cat, sum], i) => {
+                const isExc = excludedCats.has(cat);
+                const color = colors[i % colors.length];
+                
+                cont.innerHTML += `
+                <div class="flex justify-between items-center bg-gray-800/40 p-3 rounded-xl border border-gray-700 cursor-pointer ${isExc ? 'opacity-40 grayscale' : ''}"
+                     onclick="toggleAnalyticsCat('${cat}')">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full" style="background-color: ${isExc ? '#4b5563' : color}"></div>
+                        <span class="text-sm font-medium text-gray-200">${cat}</span>
+                    </div>
+                    <span class="text-sm font-bold text-gray-100">${sum.toFixed(2)}</span>
+                </div>`;
+            });
+        }
+
+        function toggleAnalyticsCat(cat) {
+            if (excludedCats.has(cat)) excludedCats.delete(cat); else excludedCats.add(cat);
+            updateAnalytics();
+        }
+
+        // Offline / Modals / Submit Logic 
         const addModal = document.getElementById('add-modal');
         let currentTxType = 'Expense';
         document.getElementById('btn-add-modal').onclick = () => addModal.classList.remove('hidden');
@@ -285,7 +401,6 @@
             };
         });
 
-        // Offline Queue Process
         async function processOfflineQueue() {
             let queue = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
             if (queue.length === 0) return;
@@ -293,77 +408,4 @@
             for (let i = 0; i < queue.length; i++) {
                 try {
                     const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(queue[i]) });
-                    if ((await res.json()).status !== "success") remainingQueue.push(queue[i]);
-                } catch { remainingQueue.push(queue[i]); break; }
-            }
-            localStorage.setItem('offlineTxQueue', JSON.stringify(remainingQueue));
-            if (remainingQueue.length < queue.length) syncData();
-        }
-        window.addEventListener('online', processOfflineQueue);
-
-        // Submit New Transaction
-        document.getElementById('btn-submit-tx').onclick = async () => {
-            const payload = {
-                source: "pwa", type: currentTxType, date: new Date().toISOString(),
-                amount: document.getElementById('input-amount').value,
-                accountFrom: currentTxType === 'Expense' ? document.getElementById('input-account').value : "",
-                accountTo: currentTxType === 'Income' ? document.getElementById('input-account').value : "",
-                category: document.getElementById('input-category').value,
-                description: document.getElementById('input-desc').value
-            };
-            if (!payload.amount || payload.amount <= 0) return alert("Введіть суму");
-            document.getElementById('btn-submit-tx').disabled = true;
-            
-            if (!navigator.onLine) {
-                let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
-                q.push(payload); localStorage.setItem('offlineTxQueue', JSON.stringify(q));
-                addModal.classList.add('hidden');
-                document.getElementById('btn-submit-tx').disabled = false;
-                return syncData(); // render queue visually later
-            }
-            try {
-                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-                addModal.classList.add('hidden');
-                document.getElementById('input-amount').value = ''; document.getElementById('input-desc').value = '';
-                syncData();
-            } finally { document.getElementById('btn-submit-tx').disabled = false; }
-        };
-
-        // Inbox Edit Logic
-        const editModal = document.getElementById('edit-modal');
-        function openEdit(id) {
-            const tx = globalTransactions.find(t => t.id === id);
-            if(!tx) return;
-            document.getElementById('edit-id').value = id;
-            document.getElementById('edit-desc').value = tx.description;
-            document.getElementById('edit-amount').value = tx.amount > 0 ? tx.amount : '';
-            editModal.classList.remove('hidden');
-        }
-
-        document.getElementById('btn-submit-edit').onclick = async () => {
-            if (!navigator.onLine) return alert("Редагування Inbox можливе тільки онлайн.");
-            
-            const btn = document.getElementById('btn-submit-edit');
-            const id = document.getElementById('edit-id').value;
-            const amount = document.getElementById('edit-amount').value;
-            const cat = document.getElementById('edit-category').value;
-            const desc = document.getElementById('edit-desc').value;
-
-            if (!amount || amount <= 0) return alert("Введіть коректну суму в PLN");
-            btn.textContent = "Збереження..."; btn.disabled = true;
-
-            const payload = { action: "edit", id: id, amount: amount, category: cat, description: desc };
-
-            try {
-                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const result = await res.json();
-                if (result.status === "success") {
-                    editModal.classList.add('hidden');
-                    syncData();
-                } else alert("Помилка: " + result.message);
-            } catch (err) { alert("Помилка мережі"); } 
-            finally { btn.textContent = "Оновити транзакцію"; btn.disabled = false; }
-        };
-    </script>
-</body>
-</html>
+                    if ((await res.
