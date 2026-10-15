@@ -40,6 +40,7 @@
             <button id="btn-sync" class="text-blue-400 font-semibold text-sm py-1 px-2 bg-blue-500/10 rounded-lg active:bg-blue-500/20 transition-colors">Синхронізувати</button>
         </header>
         
+        <!-- View: Overview -->
         <main id="view-overview" class="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar">
             <div class="bg-gray-800 p-6 rounded-3xl shadow-lg border border-gray-700/50 relative overflow-hidden">
                 <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
@@ -52,6 +53,7 @@
             <div class="space-y-3" id="transactions-container"></div>
         </main>
 
+        <!-- View: Inbox -->
         <main id="view-inbox" class="hidden flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-gray-900">
             <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 mb-4">
                 <p class="text-yellow-400 text-sm font-medium">Транзакції, що потребують уточнення або спліту.</p>
@@ -59,13 +61,54 @@
             <div class="space-y-3" id="inbox-container"></div>
         </main>
 
+        <!-- View: Accounts -->
+        <main id="view-accounts" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar bg-gray-900">
+            <div>
+                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3 ml-1">Гаманці та Картки</h2>
+                <div class="space-y-3">
+                    <div class="bg-gray-800/80 p-4 rounded-2xl border border-gray-700 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center"><span class="font-bold text-blue-400">P</span></div>
+                            <span class="font-medium text-gray-200">PKO Bank</span>
+                        </div>
+                        <span class="font-bold text-lg text-white" id="bal-pko">0.00</span>
+                    </div>
+                    <div class="bg-gray-800/80 p-4 rounded-2xl border border-gray-700 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-black flex items-center justify-center border border-gray-700"><span class="font-bold text-white">M</span></div>
+                            <span class="font-medium text-gray-200">Monobank</span>
+                        </div>
+                        <span class="font-bold text-lg text-white" id="bal-mono">0.00</span>
+                    </div>
+                    <div class="bg-gray-800/80 p-4 rounded-2xl border border-gray-700 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-green-600/20 flex items-center justify-center"><span class="font-bold text-green-400">💵</span></div>
+                            <span class="font-medium text-gray-200">Готівка</span>
+                        </div>
+                        <span class="font-bold text-lg text-white" id="bal-cash">0.00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3 ml-1">Заощадження</h2>
+                <div class="space-y-3">
+                    <div class="bg-gray-800/80 p-4 rounded-2xl border border-yellow-700/50 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center"><span class="font-bold text-yellow-400">🏦</span></div>
+                            <span class="font-medium text-gray-200">Скарбничка</span>
+                        </div>
+                        <span class="font-bold text-lg text-white" id="bal-jar">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- View: Analytics -->
         <main id="view-analytics" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar bg-gray-900">
             <div class="flex items-center justify-between bg-gray-800 rounded-2xl p-1 shadow-sm border border-gray-700/50">
                 <button onclick="changePeriodOffset(-1)" id="btn-period-prev" class="p-3 text-gray-400 active:bg-gray-700 rounded-xl transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                <button onclick="document.getElementById('period-modal').classList.remove('hidden')" class="flex-1 py-3 text-sm font-bold text-center flex items-center justify-center gap-2 active:bg-gray-700 rounded-xl transition-colors">
-                    <span id="period-label">Жовтень 2026</span>
-                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
+                <button onclick="document.getElementById('period-modal').classList.remove('hidden')" class="flex-1 py-3 text-sm font-bold text-center flex items-center justify-center gap-2 active:bg-gray-700 rounded-xl transition-colors"><span id="period-label">Жовтень 2026</span><svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
                 <button onclick="changePeriodOffset(1)" id="btn-period-next" class="p-3 text-gray-400 active:bg-gray-700 rounded-xl transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
             </div>
             <div class="relative w-56 h-56 mx-auto my-4">
@@ -87,58 +130,12 @@
         <nav class="safe-pb pt-2 px-2 border-t border-gray-800 flex justify-around shrink-0 bg-gray-900/95 backdrop-blur z-10">
             <button id="nav-overview" class="p-2 text-blue-400 flex flex-col items-center gap-1.5 w-16" onclick="switchTab('overview')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span class="text-[10px] font-bold">Огляд</span></button>
             <button id="nav-inbox" class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16 relative" onclick="switchTab('inbox')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg><span class="text-[10px] font-bold">Inbox</span><span id="inbox-badge" class="absolute top-1 right-2 flex h-2.5 w-2.5 rounded-full bg-red-500 hidden border-2 border-gray-900"></span></button>
+            <button id="nav-accounts" class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16" onclick="switchTab('accounts')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg><span class="text-[10px] font-bold">Рахунки</span></button>
             <button id="nav-analytics" class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16" onclick="switchTab('analytics')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg><span class="text-[10px] font-bold">Аналітика</span></button>
         </nav>
     </div>
 
-    <!-- Modals -->
-    <div id="period-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
-        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pt safe-pb transform transition-transform border-t border-gray-800 max-h-[90vh] overflow-y-auto">
-            <h2 class="text-xl font-bold mb-6 text-center mt-4">Проміжок часу</h2>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="setPeriodType('all')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-sm font-semibold">Весь час</span></button>
-                <button onclick="setPeriodType('year')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-xl font-bold text-gray-400">365</span><span class="text-sm font-semibold">Рік</span></button>
-                <button onclick="setPeriodType('month')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-xl font-bold text-gray-400">30</span><span class="text-sm font-semibold">Місяць</span></button>
-                <button onclick="setPeriodType('week')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-xl font-bold text-gray-400">7</span><span class="text-sm font-semibold">Тиждень</span></button>
-                <button onclick="setPeriodType('day')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-xl font-bold text-gray-400">1</span><span class="text-sm font-semibold">День</span></button>
-                <button onclick="toggleCustomDates()" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-sm font-semibold">Діапазон</span></button>
-            </div>
-            <div id="custom-date-inputs" class="hidden flex-col gap-3 mb-6 bg-gray-800 p-4 rounded-2xl border border-gray-700">
-                <div class="flex items-center gap-3"><span class="text-gray-400 text-sm w-8">Від</span><input type="date" id="date-start" class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white"></div>
-                <div class="flex items-center gap-3"><span class="text-gray-400 text-sm w-8">До</span><input type="date" id="date-end" class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white"></div>
-                <button onclick="setPeriodType('custom')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-2 active:bg-blue-700">Застосувати</button>
-            </div>
-            <button onclick="document.getElementById('period-modal').classList.add('hidden')" class="w-full text-blue-400 font-semibold py-4">Скасувати</button>
-        </div>
-    </div>
-
-    <!-- Edit Modal -->
-    <div id="edit-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
-        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 safe-pt mt-4">
-                <h2 class="text-xl font-bold text-yellow-500">Редагування</h2>
-                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
-            </div>
-            <div class="space-y-4">
-                <input type="hidden" id="edit-id">
-                <div><label class="text-xs text-gray-400 ml-1 mb-1 block">Опис</label><input type="text" id="edit-desc" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300"></div>
-                <div><label class="text-xs text-gray-400 ml-1 mb-1 block">Сума (PLN)</label><input type="number" id="edit-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-yellow-700 rounded-xl px-4 py-3 text-2xl font-bold text-center text-white"></div>
-                <div>
-                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Категорія</label>
-                    <select id="edit-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
-                        <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
-                    </select>
-                </div>
-                <div class="border-t border-gray-800 pt-4">
-                    <button type="button" onclick="toggleSplitMode()" class="w-full py-2 text-sm font-semibold text-blue-400 bg-blue-500/10 rounded-xl active:bg-blue-500/20">Розбити на кілька частин (Спліт)</button>
-                    <div id="split-container" class="hidden space-y-3 mt-3"></div>
-                    <button type="button" id="btn-add-split-row" onclick="addSplitRow()" class="hidden w-full py-2 text-xs font-semibold text-gray-300 bg-gray-800 rounded-xl mt-2">+ Додати частину</button>
-                </div>
-                <button id="btn-submit-edit" class="w-full bg-yellow-600 text-white font-bold py-4 rounded-xl mt-4 active:bg-yellow-700">Зберегти</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Modals (Add, Edit, Period) -->
     <!-- Add Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
         <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800">
@@ -154,16 +151,17 @@
                 </div>
                 <input type="number" id="input-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-4 text-3xl font-bold text-center text-white">
                 
-                <div id="fields-regular" class="grid grid-cols-2 gap-3">
-                    <select id="input-account" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none"><option value="Everyday">Everyday</option><option value="Заощадження">Заощадження</option><option value="Готівка">Готівка</option></select>
-                    <select id="input-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
-                        <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
-                    </select>
-                </div>
-                
-                <div id="fields-transfer" class="hidden grid grid-cols-2 gap-3">
-                    <select id="input-account-from" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none"><option value="Everyday">З: Everyday</option><option value="Заощадження">З: Заощадження</option><option value="Готівка">З: Готівка</option></select>
-                    <select id="input-account-to" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none"><option value="Заощадження">На: Заощадження</option><option value="Everyday">На: Everyday</option><option value="Готівка">На: Готівка</option></select>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label id="lbl-acc-1" class="text-[10px] text-gray-400 uppercase tracking-widest pl-2">З рахунку</label>
+                        <select id="input-account-1" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-3 text-sm text-white appearance-none"><option value="PKO">PKO Bank</option><option value="Monobank">Monobank</option><option value="Готівка">Готівка</option><option value="Скарбничка">Скарбничка</option></select>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label id="lbl-acc-2" class="text-[10px] text-gray-400 uppercase tracking-widest pl-2">Категорія</label>
+                        <select id="input-account-2" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-3 text-sm text-white appearance-none">
+                            <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
+                        </select>
+                    </div>
                 </div>
 
                 <input type="text" id="input-desc" placeholder="Коментар" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white">
@@ -172,9 +170,53 @@
         </div>
     </div>
 
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
+        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 safe-pt mt-4">
+                <h2 class="text-xl font-bold text-yellow-500">Редагування</h2>
+                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <div class="space-y-4">
+                <input type="hidden" id="edit-id">
+                <div class="bg-gray-800 p-3 rounded-xl border border-gray-700 flex justify-between items-center opacity-70">
+                    <span class="text-sm font-medium text-gray-400">Тип операції</span>
+                    <span id="edit-type-badge" class="text-sm font-bold text-white uppercase">Витрата</span>
+                </div>
+                <div><label class="text-xs text-gray-400 ml-1 mb-1 block">Опис</label><input type="text" id="edit-desc" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300"></div>
+                <div><label class="text-xs text-gray-400 ml-1 mb-1 block">Сума (PLN)</label><input type="number" id="edit-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-yellow-700 rounded-xl px-4 py-3 text-2xl font-bold text-center text-white"></div>
+                <div>
+                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Категорія</label>
+                    <select id="edit-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
+                        <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Зарплата">Зарплата</option><option value="Переказ">Переказ</option><option value="Інше">Інше</option>
+                    </select>
+                </div>
+                <div class="border-t border-gray-800 pt-4" id="split-module">
+                    <button type="button" onclick="toggleSplitMode()" class="w-full py-2 text-sm font-semibold text-blue-400 bg-blue-500/10 rounded-xl active:bg-blue-500/20">Розбити на кілька частин (Спліт)</button>
+                    <div id="split-container" class="hidden space-y-3 mt-3"></div>
+                    <button type="button" id="btn-add-split-row" onclick="addSplitRow()" class="hidden w-full py-2 text-xs font-semibold text-gray-300 bg-gray-800 rounded-xl mt-2">+ Додати частину</button>
+                </div>
+                <button id="btn-submit-edit" class="w-full bg-yellow-600 text-white font-bold py-4 rounded-xl mt-4 active:bg-yellow-700">Зберегти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Period Modal -->
+    <div id="period-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
+        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pt safe-pb transform transition-transform border-t border-gray-800">
+            <h2 class="text-xl font-bold mb-6 text-center mt-4">Проміжок часу</h2>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="setPeriodType('all')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-sm font-semibold">Весь час</span></button>
+                <button onclick="setPeriodType('month')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-sm font-semibold">Місяць</span></button>
+                <button onclick="setPeriodType('week')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-sm font-semibold">Тиждень</span></button>
+                <button onclick="setPeriodType('custom')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700"><span class="text-sm font-semibold">Діапазон</span></button>
+            </div>
+            <button onclick="document.getElementById('period-modal').classList.add('hidden')" class="w-full text-blue-400 font-semibold py-4">Скасувати</button>
+        </div>
+    </div>
+
     <script>
-        const PIN = "1232";
-        let currentPin = "";
+        const PIN = "5622"; let currentPin = "";
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbysKTFjH5vvIcYyBFByPl314qOSLj6QuSzmBtzkhd4hTeDr8xcDma_h_hz87LvnfZyLOg/exec"; // <-- ВСТАВ URL СЮДИ
 
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(console.error);
@@ -187,54 +229,33 @@
         }
 
         async function handleFaceID() {
-            if (!window.PublicKeyCredential) return alert("Face ID не підтримується браузером.");
-            try {
-                const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
-                await navigator.credentials.get({ publicKey: { challenge, userVerification: "required" } });
-                loginSuccess();
-            } catch (err) {
+            if (!window.PublicKeyCredential) return alert("Face ID не підтримується.");
+            try { const challenge = new Uint8Array(32); crypto.getRandomValues(challenge); await navigator.credentials.get({ publicKey: { challenge, userVerification: "required" } }); loginSuccess(); } catch (err) {
                 try {
-                    const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
-                    const userId = new Uint8Array(16); crypto.getRandomValues(userId);
-                    await navigator.credentials.create({
-                        publicKey: {
-                            challenge, rp: { name: "Finance PWA" }, user: { id: userId, name: "owner", displayName: "Власник" },
-                            pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
-                            authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" }
-                        }
-                    });
-                    loginSuccess();
-                } catch (e) { alert("Помилка Face ID: скасовано або не налаштовано."); }
+                    const challenge = new Uint8Array(32); crypto.getRandomValues(challenge); const userId = new Uint8Array(16); crypto.getRandomValues(userId);
+                    await navigator.credentials.create({ publicKey: { challenge, rp: { name: "Finance" }, user: { id: userId, name: "owner", displayName: "Власник" }, pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }], authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" } } }); loginSuccess();
+                } catch (e) { alert("Скасовано."); }
             }
         }
 
         const numpad = document.getElementById('numpad');
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 'ID', 0, 'C'].forEach(key => {
-            const btn = document.createElement('button');
-            btn.className = "h-16 flex items-center justify-center text-2xl font-medium bg-gray-800/80 rounded-2xl active:bg-gray-700 border border-gray-700/50 shadow-sm";
+            const btn = document.createElement('button'); btn.className = "h-16 flex items-center justify-center text-2xl font-medium bg-gray-800/80 rounded-2xl active:bg-gray-700 border border-gray-700/50 shadow-sm";
             btn.innerHTML = key === 'ID' ? `<span class="text-sm text-blue-400 font-bold">FaceID</span>` : key === 'C' ? `<span class="text-xl font-bold text-red-400">C</span>` : key;
             btn.onclick = () => {
-                if (key === 'C') currentPin = currentPin.slice(0, -1);
-                else if (key === 'ID') return handleFaceID();
-                else if (currentPin.length < 4) currentPin += key;
-                
+                if (key === 'C') currentPin = currentPin.slice(0, -1); else if (key === 'ID') return handleFaceID(); else if (currentPin.length < 4) currentPin += key;
                 document.querySelectorAll('.pin-dot').forEach((dot, i) => dot.classList.toggle('bg-blue-500', i < currentPin.length));
-                if (currentPin.length === 4) {
-                    setTimeout(() => {
-                        if (currentPin === PIN) { currentPin = ""; loginSuccess(); } 
-                        else { currentPin = ""; document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('bg-blue-500')); if (navigator.vibrate) navigator.vibrate(200); }
-                    }, 100);
-                }
+                if (currentPin.length === 4) { setTimeout(() => { if (currentPin === PIN) { currentPin = ""; loginSuccess(); } else { currentPin = ""; document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('bg-blue-500')); if (navigator.vibrate) navigator.vibrate(200); } }, 100); }
             };
             numpad.appendChild(btn);
         });
 
         function switchTab(tab) {
-            ['overview', 'inbox', 'analytics'].forEach(v => {
+            ['overview', 'inbox', 'accounts', 'analytics'].forEach(v => {
                 document.getElementById(`view-${v}`).classList.toggle('hidden', v !== tab);
                 document.getElementById(`nav-${v}`).classList.replace(v === tab ? 'text-gray-500' : 'text-blue-400', v === tab ? 'text-blue-400' : 'text-gray-500');
             });
-            document.getElementById('header-title').textContent = { 'overview': 'Огляд', 'inbox': 'Inbox', 'analytics': 'Аналітика' }[tab];
+            document.getElementById('header-title').textContent = { 'overview': 'Огляд', 'inbox': 'Inbox', 'accounts': 'Рахунки', 'analytics': 'Аналітика' }[tab];
             if (tab === 'analytics') updateAnalytics();
         }
 
@@ -246,6 +267,10 @@
                 const res = await fetch(WEB_APP_URL);
                 if ((data = await res.json()).status === "success") {
                     document.getElementById('balance-display').textContent = data.balance;
+                    document.getElementById('bal-pko').textContent = (data.balances["PKO"] || 0).toFixed(2);
+                    document.getElementById('bal-mono').textContent = (data.balances["Monobank"] || 0).toFixed(2);
+                    document.getElementById('bal-cash').textContent = (data.balances["Готівка"] || 0).toFixed(2);
+                    document.getElementById('bal-jar').textContent = (data.balances["Скарбничка"] || 0).toFixed(2);
                     globalTransactions = data.transactions;
                     renderTransactions(); updateAnalytics();
                 }
@@ -254,64 +279,73 @@
         document.getElementById('btn-sync').addEventListener('click', syncData);
 
         function renderTransactions() {
-            const txCont = document.getElementById('transactions-container');
-            const inxCont = document.getElementById('inbox-container');
-            txCont.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>';
-            inxCont.innerHTML = '';
-            let inxCount = 0;
-            if (globalTransactions.length === 0) {
-                txCont.innerHTML += `<div class="p-4 text-center text-gray-500 text-sm">Немає транзакцій.</div>`;
-                document.getElementById('inbox-badge').classList.add('hidden');
-                inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
-                return;
-            }
+            const txCont = document.getElementById('transactions-container'); const inxCont = document.getElementById('inbox-container');
+            txCont.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>'; inxCont.innerHTML = ''; let inxCount = 0;
+            if (globalTransactions.length === 0) return txCont.innerHTML += `<div class="p-4 text-center text-gray-500 text-sm">Немає транзакцій.</div>`;
 
             globalTransactions.forEach(tx => {
-                const isExp = tx.type === 'Expense';
-                const isTransfer = tx.type === 'Transfer';
+                const isExp = tx.type === 'Expense'; const isTransfer = tx.type === 'Transfer';
                 const isInbox = tx.category === 'Нерозподілене' || tx.category === '⚠️ Очікує конвертації';
                 const color = isTransfer ? 'text-blue-400' : (isExp ? 'text-gray-100' : 'text-green-400');
                 const sign = isTransfer ? '⇄ ' : (isExp ? '-' : '+');
                 const desc = isTransfer ? `З ${tx.accountFrom} на ${tx.accountTo}` : (tx.description || tx.category);
 
-                const html = `
-                <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border ${isInbox ? 'border-yellow-600/30' : 'border-gray-800'} active:bg-gray-700 cursor-pointer" 
-                     onclick="openEdit('${tx.id}')">
-                    <div>
-                        <p class="font-medium text-gray-200">${desc}</p>
-                        <p class="text-xs ${isInbox ? 'text-yellow-500' : 'text-gray-500'} mt-1">${tx.category} • ${tx.date}</p>
-                    </div>
-                    <p class="font-bold ${color}">${sign}${parseFloat(tx.amount).toFixed(2)}</p>
-                </div>`;
+                const html = `<div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border ${isInbox ? 'border-yellow-600/30' : 'border-gray-800'} active:bg-gray-700 cursor-pointer" onclick="openEdit('${tx.id}')"><div><p class="font-medium text-gray-200">${desc}</p><p class="text-xs ${isInbox ? 'text-yellow-500' : 'text-gray-500'} mt-1">${tx.category} • ${tx.date.substring(0,10)}</p></div><p class="font-bold ${color}">${sign}${parseFloat(tx.amount).toFixed(2)}</p></div>`;
                 if (isInbox) { inxCont.innerHTML += html; inxCount++; } else txCont.innerHTML += html;
             });
             document.getElementById('inbox-badge').classList.toggle('hidden', inxCount === 0);
             if (inxCount === 0) inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
         }
 
-        // --- Inbox Edit & Split Logic ---
+        // Add Forms UI Logic
+        let currentTxType = 'Expense';
+        const addAcc1 = document.getElementById('input-account-1'); const addAcc2 = document.getElementById('input-account-2');
+        const lblAcc1 = document.getElementById('lbl-acc-1'); const lblAcc2 = document.getElementById('lbl-acc-2');
+
+        document.getElementById('btn-add-modal').onclick = () => document.getElementById('add-modal').classList.remove('hidden');
+        document.querySelectorAll('.tx-type-btn').forEach(btn => btn.onclick = (e) => {
+            document.querySelectorAll('.tx-type-btn').forEach(b => { b.classList.replace('bg-gray-700', 'text-gray-400'); b.classList.remove('text-white', 'shadow'); });
+            e.target.classList.replace('text-gray-400', 'bg-gray-700'); e.target.classList.add('text-white', 'shadow');
+            currentTxType = e.target.textContent === 'Витрата' ? 'Expense' : (e.target.textContent === 'Дохід' ? 'Income' : 'Transfer');
+            
+            if (currentTxType === 'Expense') {
+                lblAcc1.innerText = 'З рахунку'; lblAcc2.innerText = 'Категорія';
+                addAcc1.innerHTML = '<option value="PKO">PKO Bank</option><option value="Monobank">Monobank</option><option value="Готівка">Готівка</option>';
+                addAcc2.innerHTML = '<option>Продукти</option><option>Транспорт</option><option>Розваги</option><option>Житло</option><option>Інше</option>';
+            } else if (currentTxType === 'Income') {
+                lblAcc1.innerText = 'На рахунок'; lblAcc2.innerText = 'Категорія';
+                addAcc1.innerHTML = '<option value="PKO">PKO Bank</option><option value="Monobank">Monobank</option><option value="Готівка">Готівка</option>';
+                addAcc2.innerHTML = '<option>Зарплата</option><option>Подарунок</option><option>Переказ</option><option>Відсотки</option><option>Інше</option>';
+            } else if (currentTxType === 'Transfer') {
+                lblAcc1.innerText = 'З рахунку'; lblAcc2.innerText = 'На рахунок';
+                addAcc1.innerHTML = '<option value="PKO">PKO Bank</option><option value="Monobank">Monobank</option><option value="Готівка">Готівка</option>';
+                addAcc2.innerHTML = '<option value="Скарбничка">Скарбничка</option><option value="PKO">PKO Bank</option><option value="Monobank">Monobank</option><option value="Готівка">Готівка</option>';
+            }
+        });
+
+        document.getElementById('btn-submit-tx').onclick = async () => {
+            const p = { 
+                source: "pwa", type: currentTxType, date: new Date().toISOString(), amount: document.getElementById('input-amount').value, 
+                accountFrom: currentTxType !== 'Income' ? addAcc1.value : '', 
+                accountTo: currentTxType === 'Transfer' ? addAcc2.value : (currentTxType === 'Income' ? addAcc1.value : ''), 
+                category: currentTxType === 'Transfer' ? 'Переказ' : addAcc2.value, description: document.getElementById('input-desc').value 
+            };
+            if (!p.amount || p.amount <= 0) return alert("Введіть суму");
+            document.getElementById('btn-submit-tx').disabled = true;
+            if (!navigator.onLine) { let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; q.push(p); localStorage.setItem('offlineTxQueue', JSON.stringify(q)); document.getElementById('add-modal').classList.add('hidden'); document.getElementById('btn-submit-tx').disabled = false; return syncData(); }
+            try { await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) }); document.getElementById('add-modal').classList.add('hidden'); syncData(); } finally { document.getElementById('btn-submit-tx').disabled = false; }
+        };
+
+        // Edit / Split Form Logic
         let isSplitActive = false;
         function toggleSplitMode() {
-            isSplitActive = !isSplitActive;
-            const container = document.getElementById('split-container');
-            const btnAdd = document.getElementById('btn-add-split-row');
-            container.classList.toggle('hidden', !isSplitActive);
-            btnAdd.classList.toggle('hidden', !isSplitActive);
-            if (isSplitActive && container.children.length === 0) { addSplitRow(); addSplitRow(); }
+            isSplitActive = !isSplitActive; document.getElementById('split-container').classList.toggle('hidden', !isSplitActive); document.getElementById('btn-add-split-row').classList.toggle('hidden', !isSplitActive);
+            if (isSplitActive && document.getElementById('split-container').children.length === 0) { addSplitRow(); addSplitRow(); }
         }
-
         function addSplitRow() {
-            const container = document.getElementById('split-container');
-            const row = document.createElement('div');
-            row.className = "flex gap-2 items-center bg-gray-800/80 p-2 rounded-xl border border-gray-700";
-            row.innerHTML = `
-                <input type="number" placeholder="Сума" class="w-24 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-sm text-white font-bold split-amount">
-                <select class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white split-cat">
-                    <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
-                </select>
-                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-2">✕</button>
-            `;
-            container.appendChild(row);
+            const row = document.createElement('div'); row.className = "flex gap-2 items-center bg-gray-800/80 p-2 rounded-xl border border-gray-700";
+            row.innerHTML = `<input type="number" placeholder="Сума" class="w-24 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-sm text-white font-bold split-amount"><select class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white split-cat"><option>Продукти</option><option>Транспорт</option><option>Розваги</option><option>Інше</option></select><button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-2">✕</button>`;
+            document.getElementById('split-container').appendChild(row);
         }
 
         function openEdit(id) {
@@ -319,121 +353,37 @@
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-desc').value = tx.description;
             document.getElementById('edit-amount').value = tx.amount;
-            isSplitActive = false; document.getElementById('split-container').innerHTML = '';
-            document.getElementById('split-container').classList.add('hidden');
-            document.getElementById('btn-add-split-row').classList.add('hidden');
+            document.getElementById('edit-type-badge').innerText = tx.type === 'Expense' ? 'Витрата' : (tx.type === 'Income' ? 'Дохід' : 'Переказ');
+            
+            isSplitActive = false; document.getElementById('split-container').innerHTML = ''; document.getElementById('split-container').classList.add('hidden'); document.getElementById('btn-add-split-row').classList.add('hidden');
+            document.getElementById('split-module').classList.toggle('hidden', tx.type !== 'Expense'); // Спліт доступний тільки для витрат
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
         document.getElementById('btn-submit-edit').onclick = async () => {
             const id = document.getElementById('edit-id').value; const desc = document.getElementById('edit-desc').value;
             if (isSplitActive) {
-                const rows = document.querySelectorAll('#split-container > div'); let splits = []; let total = 0;
-                rows.forEach(r => {
-                    const amt = parseFloat(r.querySelector('.split-amount').value) || 0; const cat = r.querySelector('.split-cat').value;
-                    if (amt > 0) { splits.push({ amount: amt, category: cat, description: desc }); total += amt; }
-                });
-                if (splits.length < 2) return alert("Потрібно мінімум 2 частини для спліту");
+                const rows = document.querySelectorAll('#split-container > div'); let splits = [];
+                rows.forEach(r => { const amt = parseFloat(r.querySelector('.split-amount').value) || 0; if (amt > 0) splits.push({ amount: amt, category: r.querySelector('.split-cat').value, description: desc }); });
+                if (splits.length < 2) return alert("Потрібно мінімум 2 частини");
                 const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "split", id, splits }) });
                 if ((await res.json()).status === "success") { document.getElementById('edit-modal').classList.add('hidden'); syncData(); }
             } else {
-                const amount = document.getElementById('edit-amount').value; const cat = document.getElementById('edit-category').value;
-                const p = { action: "edit", id, amount, category: cat, description: desc };
+                const p = { action: "edit", id, amount: document.getElementById('edit-amount').value, category: document.getElementById('edit-category').value, description: desc };
                 const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) });
                 if ((await res.json()).status === "success") { document.getElementById('edit-modal').classList.add('hidden'); syncData(); }
             }
         };
 
-        // Analytics
+        // Analytics Minimal Stub
         let chartInstance = null; let excludedCats = new Set(); const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1'];
         let actPeriod = 'month'; let pOffset = 0; const monthNom = ["Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"];
-
-        function toggleCustomDates() { document.getElementById('custom-date-inputs').classList.toggle('hidden'); document.getElementById('custom-date-inputs').classList.toggle('flex'); }
-        function setPeriodType(type) { actPeriod = type; pOffset = 0; document.getElementById('period-modal').classList.add('hidden'); updateAnalytics(); }
-        function changePeriodOffset(dir) { if (actPeriod === 'all' || actPeriod === 'custom') return; pOffset += dir; updateAnalytics(); }
-
-        function getPeriodRange() {
-            const now = new Date(); const y = now.getFullYear(); const m = now.getMonth(); const d = now.getDate();
-            if (actPeriod === 'all') return { start: new Date(2000,0,1), end: new Date(2100,0,1), label: 'Весь час' };
-            if (actPeriod === 'year') { const start = new Date(y + pOffset, 0, 1); const end = new Date(y + pOffset, 11, 31, 23, 59, 59); return { start, end, label: `${y + pOffset} рік` }; }
-            if (actPeriod === 'month') { const start = new Date(y, m + pOffset, 1); const end = new Date(y, m + pOffset + 1, 0, 23, 59, 59); return { start, end, label: `${monthNom[start.getMonth()]} ${start.getFullYear()}` }; }
-            if (actPeriod === 'week') { const dayIdx = now.getDay() === 0 ? 6 : now.getDay() - 1; const start = new Date(y, m, d - dayIdx + (pOffset * 7)); const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59); return { start, end, label: 'Тиждень' }; }
-            if (actPeriod === 'day') { const start = new Date(y, m, d + pOffset); const end = new Date(y, m, d + pOffset, 23, 59, 59); return { start, end, label: `${start.getDate()} ${monthNom[start.getMonth()]}` }; }
-            if (actPeriod === 'custom') { const sV = document.getElementById('date-start').value; const eV = document.getElementById('date-end').value; const start = sV ? new Date(sV) : new Date(2000,0,1); const end = eV ? new Date(eV) : new Date(); end.setHours(23, 59, 59); return { start, end, label: 'Кастом' }; }
-        }
-
-        function parseTxDate(dateStr) {
-            if (!dateStr) return new Date(); if (dateStr.includes('T')) return new Date(dateStr);
-            const parts = dateStr.split(' '); if (parts.length > 0 && parts[0].includes('.')) { const [day, month] = parts[0].split('.'); return new Date(new Date().getFullYear(), parseInt(month) - 1, parseInt(day)); }
-            return new Date();
-        }
-
-        function updateAnalytics() {
-            const range = getPeriodRange(); document.getElementById('period-label').textContent = range.label;
-            const btnPrev = document.getElementById('btn-period-prev'); const btnNext = document.getElementById('btn-period-next');
-            const noArrows = (actPeriod === 'all' || actPeriod === 'custom'); btnPrev.style.opacity = noArrows ? '0.3' : '1'; btnNext.style.opacity = noArrows ? '0.3' : '1';
-
-            let expenses = globalTransactions.filter(tx => tx.type === 'Expense' && parseTxDate(tx.date) >= range.start && parseTxDate(tx.date) <= range.end);
-            const totals = {}; expenses.forEach(tx => totals[tx.category || 'Інше'] = (totals[tx.category || 'Інше'] || 0) + parseFloat(tx.amount));
-            const labels = []; const data = []; let activeSum = 0;
-            Object.keys(totals).forEach(c => { if (!excludedCats.has(c)) activeSum += totals[c]; });
-            Object.keys(totals).sort((a,b) => totals[b]-totals[a]).forEach(cat => { if (!excludedCats.has(cat)) { labels.push(cat); data.push(totals[cat]); } });
-
-            document.getElementById('analytics-total').textContent = activeSum.toFixed(2); renderChart(labels, data);
-            
-            const cont = document.getElementById('analytics-categories'); cont.innerHTML = '';
-            Object.entries(totals).sort((a,b) => b[1]-a[1]).forEach(([cat, sum], i) => {
-                const isExc = excludedCats.has(cat); const color = colors[i % colors.length]; const pct = (!isExc && activeSum > 0) ? ((sum / activeSum) * 100).toFixed(1) : 0;
-                cont.innerHTML += `<div class="flex justify-between items-center bg-gray-800/40 p-3 rounded-xl border border-gray-700 cursor-pointer ${isExc ? 'opacity-40 grayscale' : ''}" onclick="toggleCat('${cat}')"><div class="flex items-center gap-3"><div class="w-3 h-3 rounded-full" style="background-color: ${isExc ? '#4b5563' : color}"></div><span class="text-sm font-medium text-gray-200">${cat}</span></div><div class="text-right">${!isExc ? `<span class="text-xs text-gray-400 mr-2">${pct}%</span>` : ''}<span class="text-sm font-bold text-gray-100">${sum.toFixed(2)}</span></div></div>`;
-            });
-        }
-
-        function renderChart(labels, data) {
-            const ctx = document.getElementById('analytics-chart'); if (chartInstance) chartInstance.destroy();
-            if (data.length === 0) { chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Немає'], datasets: [{ data: [1], backgroundColor: ['#374151'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } } } }); return; }
-            chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false } } } });
-        }
+        function toggleCustomDates() { } function setPeriodType(type) { actPeriod = type; pOffset = 0; document.getElementById('period-modal').classList.add('hidden'); updateAnalytics(); } function changePeriodOffset(dir) { if (actPeriod === 'all') return; pOffset += dir; updateAnalytics(); }
+        function parseTxDate(dateStr) { if (!dateStr) return new Date(); if (dateStr.includes('T')) return new Date(dateStr); const p = dateStr.split(' '); if (p.length > 0 && p[0].includes('.')) { const [d, m] = p[0].split('.'); return new Date(new Date().getFullYear(), parseInt(m) - 1, parseInt(d)); } return new Date(); }
+        function getPeriodRange() { const now = new Date(); const y = now.getFullYear(); const m = now.getMonth(); const d = now.getDate(); if (actPeriod === 'all') return { start: new Date(2000,0,1), end: new Date(2100,0,1), label: 'Весь час' }; if (actPeriod === 'year') { return { start: new Date(y+pOffset,0,1), end: new Date(y+pOffset,11,31,23,59,59), label: `${y+pOffset} рік` }; } if (actPeriod === 'month') { return { start: new Date(y, m+pOffset, 1), end: new Date(y, m+pOffset+1, 0, 23,59,59), label: `${monthNom[new Date(y, m+pOffset, 1).getMonth()]} ${new Date(y, m+pOffset, 1).getFullYear()}` }; } return { start: new Date(y,m,d-7), end: new Date(2100,0,1), label: 'Тиждень' }; }
+        function updateAnalytics() { const r = getPeriodRange(); document.getElementById('period-label').textContent = r.label; let e = globalTransactions.filter(tx => tx.type === 'Expense' && parseTxDate(tx.date) >= r.start && parseTxDate(tx.date) <= r.end); const t = {}; e.forEach(tx => t[tx.category || 'Інше'] = (t[tx.category || 'Інше'] || 0) + parseFloat(tx.amount)); const l = []; const d = []; let aSum = 0; Object.keys(t).forEach(c => { if (!excludedCats.has(c)) aSum += t[c]; }); Object.keys(t).sort((a,b) => t[b]-t[a]).forEach(c => { if (!excludedCats.has(c)) { l.push(c); d.push(t[c]); } }); document.getElementById('analytics-total').textContent = aSum.toFixed(2); const ctx = document.getElementById('analytics-chart'); if (chartInstance) chartInstance.destroy(); if (d.length === 0) { chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Немає'], datasets: [{ data: [1], backgroundColor: ['#374151'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } } } }); } else { chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: l, datasets: [{ data: d, backgroundColor: colors, borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false } } } }); } const cont = document.getElementById('analytics-categories'); cont.innerHTML = ''; Object.entries(t).sort((a,b) => b[1]-a[1]).forEach(([c, s], i) => { const isE = excludedCats.has(c); const pct = (!isE && aSum > 0) ? ((s / aSum) * 100).toFixed(1) : 0; cont.innerHTML += `<div class="flex justify-between items-center bg-gray-800/40 p-3 rounded-xl border border-gray-700 cursor-pointer ${isE ? 'opacity-40 grayscale' : ''}" onclick="toggleCat('${c}')"><div class="flex items-center gap-3"><div class="w-3 h-3 rounded-full" style="background-color: ${isE ? '#4b5563' : colors[i % colors.length]}"></div><span class="text-sm font-medium text-gray-200">${c}</span></div><div class="text-right">${!isE ? `<span class="text-xs text-gray-400 mr-2">${pct}%</span>` : ''}<span class="text-sm font-bold text-gray-100">${s.toFixed(2)}</span></div></div>`; }); }
         function toggleCat(cat) { excludedCats.has(cat) ? excludedCats.delete(cat) : excludedCats.add(cat); updateAnalytics(); }
-
-        // Add Modal
-        let currentTxType = 'Expense';
-        document.getElementById('btn-add-modal').onclick = () => document.getElementById('add-modal').classList.remove('hidden');
-        
-        document.querySelectorAll('.tx-type-btn').forEach(btn => btn.onclick = (e) => {
-            document.querySelectorAll('.tx-type-btn').forEach(b => { b.classList.replace('bg-gray-700', 'text-gray-400'); b.classList.remove('text-white', 'shadow'); });
-            e.target.classList.replace('text-gray-400', 'bg-gray-700'); e.target.classList.add('text-white', 'shadow');
-            
-            const txt = e.target.textContent;
-            currentTxType = txt === 'Витрата' ? 'Expense' : (txt === 'Дохід' ? 'Income' : 'Transfer');
-            
-            if (currentTxType === 'Transfer') {
-                document.getElementById('fields-regular').classList.add('hidden');
-                document.getElementById('fields-transfer').classList.remove('hidden');
-            } else {
-                document.getElementById('fields-transfer').classList.add('hidden');
-                document.getElementById('fields-regular').classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('btn-submit-tx').onclick = async () => {
-            const p = { 
-                source: "pwa", type: currentTxType, date: new Date().toISOString(), amount: document.getElementById('input-amount').value, 
-                accountFrom: currentTxType === 'Transfer' ? document.getElementById('input-account-from').value : (currentTxType === 'Expense' ? document.getElementById('input-account').value : ''), 
-                accountTo: currentTxType === 'Transfer' ? document.getElementById('input-account-to').value : (currentTxType === 'Income' ? document.getElementById('input-account').value : ''), 
-                category: currentTxType === 'Transfer' ? 'Переказ' : document.getElementById('input-category').value, description: document.getElementById('input-desc').value 
-            };
-            if (!p.amount || p.amount <= 0) return alert("Введіть суму");
-            document.getElementById('btn-submit-tx').disabled = true;
-            if (!navigator.onLine) { let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; q.push(p); localStorage.setItem('offlineTxQueue', JSON.stringify(q)); document.getElementById('add-modal').classList.add('hidden'); document.getElementById('btn-submit-tx').disabled = false; return syncData(); }
-            try { await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) }); document.getElementById('add-modal').classList.add('hidden'); syncData(); } finally { document.getElementById('btn-submit-tx').disabled = false; }
-        };
-        
-        async function processOfflineQueue() {
-            let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; if (q.length === 0) return; let rem = [];
-            for (let i of q) { try { if ((await (await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(i) })).json()).status !== "success") rem.push(i); } catch { rem.push(i); break; } }
-            localStorage.setItem('offlineTxQueue', JSON.stringify(rem)); if (rem.length < q.length) syncData();
-        }
-        window.addEventListener('online', processOfflineQueue);
+        async function processOfflineQueue() { let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; if (q.length === 0) return; let rem = []; for (let i of q) { try { if ((await (await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(i) })).json()).status !== "success") rem.push(i); } catch { rem.push(i); break; } } localStorage.setItem('offlineTxQueue', JSON.stringify(rem)); if (rem.length < q.length) syncData(); } window.addEventListener('online', processOfflineQueue);
     </script>
 </body>
 </html>
