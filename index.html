@@ -13,7 +13,6 @@
         tailwind.config = { darkMode: 'class' };
     </script>
     <style>
-        /* Відступи для Dynamic Island та нижньої смужки iPhone */
         .safe-pt { padding-top: max(1.5rem, env(safe-area-inset-top)); }
         .safe-pb { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -31,31 +30,27 @@
             <div class="w-4 h-4 rounded-full bg-gray-700 pin-dot transition-colors duration-200"></div>
             <div class="w-4 h-4 rounded-full bg-gray-700 pin-dot transition-colors duration-200"></div>
         </div>
-        <div class="grid grid-cols-3 gap-4 w-72 max-w-full" id="numpad">
-            <!-- Генерується через JS -->
-        </div>
+        <div class="grid grid-cols-3 gap-4 w-72 max-w-full" id="numpad"></div>
     </div>
 
-    <!-- Main App Screen (Hidden) -->
-    <div id="app-screen" class="hidden h-screen flex-col">
-        <!-- Header -->
+    <!-- Main App Screen -->
+    <div id="app-screen" class="hidden h-screen flex-col relative">
         <header class="safe-pt px-4 pb-3 border-b border-gray-800 flex justify-between items-end shrink-0 bg-gray-900/95 backdrop-blur z-10">
             <h1 class="text-2xl font-bold tracking-tight">Огляд</h1>
             <button id="btn-sync" class="text-blue-400 font-semibold text-sm py-1 px-2 bg-blue-500/10 rounded-lg active:bg-blue-500/20 transition-colors">Синхронізувати</button>
         </header>
         
-        <!-- Main Content -->
         <main class="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar">
             <div class="bg-gray-800 p-6 rounded-3xl shadow-lg border border-gray-700/50 relative overflow-hidden">
                 <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
                 <p class="text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">Загальний Баланс</p>
                 <div class="flex items-baseline gap-1">
-                    <p class="text-4xl font-bold tracking-tight">0.00</p>
+                    <p class="text-4xl font-bold tracking-tight" id="balance-display">0.00</p>
                     <span class="text-gray-400 font-semibold text-lg">PLN</span>
                 </div>
             </div>
             
-            <div class="space-y-3">
+            <div class="space-y-3" id="transactions-container">
                 <h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>
                 <div class="bg-gray-800/50 rounded-2xl p-4 text-center text-gray-500 text-sm border border-gray-800">
                     Немає транзакцій. Натисніть "Синхронізувати".
@@ -63,7 +58,11 @@
             </div>
         </main>
         
-        <!-- Bottom Nav -->
+        <!-- FAB Add Button -->
+        <button id="btn-add-modal" class="absolute bottom-24 right-4 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-600/30 active:bg-blue-700 transition-transform active:scale-95 z-20">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+        </button>
+
         <nav class="safe-pb pt-2 px-2 border-t border-gray-800 flex justify-around shrink-0 bg-gray-900/95 backdrop-blur z-10">
             <button class="p-2 text-blue-400 flex flex-col items-center gap-1.5 w-16">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
@@ -73,39 +72,71 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
                 <span class="text-[10px] font-bold">Inbox</span>
             </button>
-            <button class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                <span class="text-[10px] font-bold">Аналітика</span>
-            </button>
         </nav>
     </div>
 
+    <!-- Add Transaction Modal -->
+    <div id="add-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
+        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb transform transition-transform border-t border-gray-800">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Нова операція</h2>
+                <button id="btn-close-modal" class="p-2 text-gray-400 active:text-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex bg-gray-800 p-1 rounded-xl">
+                    <button id="type-expense" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-gray-700 text-white shadow">Витрата</button>
+                    <button id="type-income" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 active:bg-gray-700/50">Дохід</button>
+                    <button id="type-transfer" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 active:bg-gray-700/50">Переказ</button>
+                </div>
+                
+                <input type="number" id="input-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-4 text-3xl font-bold text-center focus:outline-none focus:border-blue-500 placeholder-gray-600 text-white">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="input-account" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 text-white appearance-none">
+                        <option value="Everyday">Everyday</option>
+                        <option value="Savings">Savings</option>
+                        <option value="Cash">Cash</option>
+                    </select>
+                    
+                    <select id="input-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 text-white appearance-none">
+                        <option value="Продукти">Продукти</option>
+                        <option value="Транспорт">Транспорт</option>
+                        <option value="Житло">Житло</option>
+                        <option value="Розваги">Розваги</option>
+                        <option value="Зарплата">Зарплата</option>
+                        <option value="Інше">Інше</option>
+                    </select>
+                </div>
+                
+                <input type="text" id="input-desc" placeholder="Коментар (Biedronka, Кава...)" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-500 text-white">
+                
+                <button id="btn-submit-tx" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-2 active:bg-blue-700 shadow-lg shadow-blue-600/20">Зберегти</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const PIN = "5622";
+        const PIN = "5632";
         let currentPin = "";
         
-        // ВСТАВ СВІЙ URL ВІД APPS SCRIPT МІЖ ЛАПКАМИ
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzcOqlYysuG0oYZc5mWphwGu-yiT12z4SxCZYki8fr8H_BgBdMmKmhtf1NijN3-HqSJqg/exec"; 
+        // ВСТАВ СВІЙ АКТУАЛЬНИЙ URL ТУТ!
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzcOqlYysuG0oYZc5mWphwGu-yiT12z4SxCZYki8fr8H_BgBdMmKmhtf1NijN3-HqSJqg/exec";
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
         }
 
+        // Numpad Auth Logic
         const numpadContainer = document.getElementById('numpad');
         const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'ID', 0, 'C'];
 
         keys.forEach(key => {
             const btn = document.createElement('button');
             btn.className = "h-16 flex items-center justify-center text-2xl font-medium bg-gray-800/80 rounded-2xl active:bg-gray-700 transition-colors border border-gray-700/50 shadow-sm";
-            
-            if (key === 'ID') {
-                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" /></svg>`;
-            } else if (key === 'C') {
-                btn.innerHTML = `<span class="text-xl font-bold text-red-400">C</span>`;
-            } else {
-                btn.textContent = key;
-            }
-            
+            if (key === 'ID') btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" /></svg>`;
+            else if (key === 'C') btn.innerHTML = `<span class="text-xl font-bold text-red-400">C</span>`;
+            else btn.textContent = key;
             btn.onclick = () => handleNumpad(key);
             numpadContainer.appendChild(btn);
         });
@@ -123,7 +154,7 @@
                         document.getElementById('auth-screen').classList.add('hidden');
                         document.getElementById('app-screen').classList.remove('hidden');
                         document.getElementById('app-screen').classList.add('flex');
-                        syncData(); // Автоматично підтягує базу при успішному вході
+                        syncData();
                     } else {
                         currentPin = "";
                         updatePinUI();
@@ -140,18 +171,17 @@
             });
         }
 
+        // Fetch Data Logic
         async function syncData() {
             const btn = document.getElementById('btn-sync');
             btn.textContent = "Оновлення...";
-            
             try {
                 const res = await fetch(WEB_APP_URL);
                 const data = await res.json();
                 
                 if(data.status === "success") {
-                    document.querySelector('.text-4xl.font-bold').textContent = data.balance;
-                    
-                    const txContainer = document.querySelector('.space-y-3');
+                    document.getElementById('balance-display').textContent = data.balance;
+                    const txContainer = document.getElementById('transactions-container');
                     txContainer.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>';
                     
                     if (data.transactions.length === 0) {
@@ -161,11 +191,10 @@
                             const isExpense = tx.type === 'Expense';
                             const sign = isExpense ? '-' : '+';
                             const color = isExpense ? 'text-gray-100' : 'text-green-400';
-                            
                             txContainer.innerHTML += `
                             <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border border-gray-800">
                                 <div>
-                                    <p class="font-medium text-gray-200">${tx.description}</p>
+                                    <p class="font-medium text-gray-200">${tx.description || tx.category}</p>
                                     <p class="text-xs text-gray-500 mt-1">${tx.category} • ${tx.date}</p>
                                 </div>
                                 <p class="font-bold ${color}">${sign}${parseFloat(tx.amount).toFixed(2)}</p>
@@ -174,13 +203,83 @@
                     }
                 }
             } catch (err) {
-                alert("Помилка: " + err.message);
+                alert("Помилка синхронізації");
             } finally {
                 btn.textContent = "Синхронізувати";
             }
         }
-
         document.getElementById('btn-sync').addEventListener('click', syncData);
+
+        // Modal Logic
+        const modal = document.getElementById('add-modal');
+        let currentTxType = 'Expense';
+
+        document.getElementById('btn-add-modal').onclick = () => modal.classList.remove('hidden');
+        document.getElementById('btn-close-modal').onclick = () => modal.classList.add('hidden');
+
+        // Type selection
+        ['expense', 'income', 'transfer'].forEach(type => {
+            document.getElementById(`type-${type}`).onclick = (e) => {
+                document.querySelectorAll('#add-modal .flex button').forEach(b => {
+                    b.classList.remove('bg-gray-700', 'text-white', 'shadow');
+                    b.classList.add('text-gray-400');
+                });
+                e.target.classList.remove('text-gray-400');
+                e.target.classList.add('bg-gray-700', 'text-white', 'shadow');
+                
+                const typeMap = { 'expense': 'Expense', 'income': 'Income', 'transfer': 'Transfer' };
+                currentTxType = typeMap[type];
+            };
+        });
+
+        // Submit Transaction
+        document.getElementById('btn-submit-tx').onclick = async () => {
+            const amount = document.getElementById('input-amount').value;
+            const account = document.getElementById('input-account').value;
+            const category = document.getElementById('input-category').value;
+            const desc = document.getElementById('input-desc').value;
+
+            if (!amount || amount <= 0) return alert("Введіть коректну суму");
+
+            const btn = document.getElementById('btn-submit-tx');
+            btn.textContent = "Збереження...";
+            btn.disabled = true;
+
+            const payload = {
+                source: "pwa",
+                type: currentTxType,
+                amount: amount,
+                accountFrom: currentTxType === 'Expense' || currentTxType === 'Transfer' ? account : "",
+                accountTo: currentTxType === 'Income' || currentTxType === 'Transfer' ? account : "",
+                category: category,
+                description: desc,
+                date: new Date().toISOString()
+            };
+
+            try {
+                const res = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' }, // Apps Script CORS workaround
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await res.json();
+                if (result.status === "success") {
+                    modal.classList.add('hidden');
+                    document.getElementById('input-amount').value = '';
+                    document.getElementById('input-desc').value = '';
+                    syncData();
+                } else {
+                    alert("Помилка БД: " + result.message);
+                }
+            } catch (err) {
+                // Офлайн режим буде додано пізніше
+                alert("Мережева помилка. Офлайн черга ще не налаштована.");
+            } finally {
+                btn.textContent = "Зберегти";
+                btn.disabled = false;
+            }
+        };
     </script>
 </body>
 </html>
