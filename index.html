@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>tailwind.config = { darkMode: 'class' };</script>
     <style>
-        .safe-pt { padding-top: max(1.5rem, env(safe-area-inset-top)); }
+        .safe-pt { padding-top: max(2.5rem, env(safe-area-inset-top)); }
         .safe-pb { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -97,8 +97,8 @@
 
     <!-- Period Selection Modal -->
     <div id="period-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
-        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pt safe-pb transform transition-transform border-t border-gray-800 max-h-[90vh] overflow-y-auto">
-            <h2 class="text-xl font-bold mb-6 text-center">Проміжок часу</h2>
+        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb transform transition-transform border-t border-gray-800 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold mb-6 text-center safe-pt mt-4">Проміжок часу</h2>
             
             <div class="grid grid-cols-2 gap-3 mb-6">
                 <button onclick="setPeriodType('all')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
@@ -146,7 +146,7 @@
     <!-- Edit / Split Modal -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
         <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 safe-pt mt-4">
                 <h2 class="text-xl font-bold text-yellow-500">Обробка Inbox</h2>
                 <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
@@ -182,7 +182,7 @@
     <!-- Add Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
         <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex justify-between items-center mb-6 safe-pt mt-4">
                 <h2 class="text-xl font-bold">Нова операція</h2>
                 <button onclick="document.getElementById('add-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
@@ -202,7 +202,7 @@
     </div>
 
     <script>
-        const PIN = "1236";
+        const PIN = "1233";
         let currentPin = "";
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbysKTFjH5vvIcYyBFByPl314qOSLj6QuSzmBtzkhd4hTeDr8xcDma_h_hz87LvnfZyLOg/exec";
 
@@ -267,7 +267,6 @@
             txCont.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>';
             inxCont.innerHTML = '';
             let inxCount = 0;
-            
             if (globalTransactions.length === 0) {
                 txCont.innerHTML += `<div class="p-4 text-center text-gray-500 text-sm">Немає транзакцій.</div>`;
                 document.getElementById('inbox-badge').classList.add('hidden');
@@ -278,8 +277,6 @@
             globalTransactions.forEach(tx => {
                 const isExp = tx.type === 'Expense';
                 const isInbox = tx.category === 'Нерозподілене' || tx.category === '⚠️ Очікує конвертації';
-                
-                // Клік (openEdit) та стилі курсора тепер доступні для всіх карток
                 const html = `
                 <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border ${isInbox ? 'border-yellow-600/30' : 'border-gray-800'} active:bg-gray-700 cursor-pointer" 
                      onclick="openEdit('${tx.id}')">
@@ -289,15 +286,8 @@
                     </div>
                     <p class="font-bold ${isExp ? 'text-gray-100' : 'text-green-400'}">${isExp ? '-' : '+'}${parseFloat(tx.amount).toFixed(2)}</p>
                 </div>`;
-                
-                if (isInbox) { 
-                    inxCont.innerHTML += html; 
-                    inxCount++; 
-                } else { 
-                    txCont.innerHTML += html; 
-                }
+                if (isInbox) { inxCont.innerHTML += html; inxCount++; } else txCont.innerHTML += html;
             });
-            
             document.getElementById('inbox-badge').classList.toggle('hidden', inxCount === 0);
             if (inxCount === 0) inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
         }
