@@ -56,15 +56,13 @@
         <!-- View: Inbox -->
         <main id="view-inbox" class="hidden flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-gray-900">
             <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 mb-4">
-                <p class="text-yellow-400 text-sm font-medium">Транзакції, що потребують уточнення категорії.</p>
+                <p class="text-yellow-400 text-sm font-medium">Транзакції, що потребують уточнення або спліту.</p>
             </div>
             <div class="space-y-3" id="inbox-container"></div>
         </main>
 
         <!-- View: Analytics -->
         <main id="view-analytics" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar bg-gray-900">
-            
-            <!-- Period Selector Bar -->
             <div class="flex items-center justify-between bg-gray-800 rounded-2xl p-1 shadow-sm border border-gray-700/50">
                 <button onclick="changePeriodOffset(-1)" id="btn-period-prev" class="p-3 text-gray-400 active:bg-gray-700 rounded-xl transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
                 <button onclick="document.getElementById('period-modal').classList.remove('hidden')" class="flex-1 py-3 text-sm font-bold text-center flex items-center justify-center gap-2 active:bg-gray-700 rounded-xl transition-colors">
@@ -74,7 +72,6 @@
                 <button onclick="changePeriodOffset(1)" id="btn-period-next" class="p-3 text-gray-400 active:bg-gray-700 rounded-xl transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
             </div>
             
-            <!-- Chart -->
             <div class="relative w-56 h-56 mx-auto my-4">
                 <canvas id="analytics-chart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
@@ -82,7 +79,6 @@
                     <span id="analytics-total" class="text-xl font-bold text-white">0.00</span>
                 </div>
             </div>
-            
             <div class="space-y-2" id="analytics-categories"></div>
         </main>
 
@@ -101,7 +97,7 @@
 
     <!-- Period Selection Modal -->
     <div id="period-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
-        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pt safe-pb transform transition-transform border-t border-gray-800">
+        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pt safe-pb transform transition-transform border-t border-gray-800 max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-6 text-center">Проміжок часу</h2>
             
             <div class="grid grid-cols-2 gap-3 mb-6">
@@ -147,7 +143,43 @@
         </div>
     </div>
 
-    <!-- Modals Add/Edit -->
+    <!-- Edit / Split Modal -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
+        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-yellow-500">Обробка Inbox</h2>
+                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <div class="space-y-4">
+                <input type="hidden" id="edit-id">
+                <div>
+                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Опис</label>
+                    <input type="text" id="edit-desc" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Сума (PLN)</label>
+                    <input type="number" id="edit-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-yellow-700 rounded-xl px-4 py-3 text-2xl font-bold text-center text-white">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Категорія</label>
+                    <select id="edit-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
+                        <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
+                    </select>
+                </div>
+
+                <!-- Split section -->
+                <div class="border-t border-gray-800 pt-4">
+                    <button type="button" onclick="toggleSplitMode()" class="w-full py-2 text-sm font-semibold text-blue-400 bg-blue-500/10 rounded-xl active:bg-blue-500/20">Розбити на кілька частин (Спліт)</button>
+                    <div id="split-container" class="hidden space-y-3 mt-3"></div>
+                    <button type="button" id="btn-add-split-row" onclick="addSplitRow()" class="hidden w-full py-2 text-xs font-semibold text-gray-300 bg-gray-800 rounded-xl mt-2">+ Додати частину</button>
+                </div>
+
+                <button id="btn-submit-edit" class="w-full bg-yellow-600 text-white font-bold py-4 rounded-xl mt-4 active:bg-yellow-700">Зберегти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
         <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800">
             <div class="flex justify-between items-center mb-6">
@@ -160,38 +192,17 @@
                     <button id="type-income" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 tx-type-btn">Дохід</button>
                 </div>
                 <input type="number" id="input-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-4 text-3xl font-bold text-center text-white">
-                <div class="grid grid-cols-2 gap-3">
-                    <select id="input-account" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none"><option value="Everyday">Everyday</option></select>
-                    <select id="input-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
-                        <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
-                    </select>
-                </div>
+                <select id="input-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
+                    <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
+                </select>
                 <input type="text" id="input-desc" placeholder="Коментар" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white">
                 <button id="btn-submit-tx" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-2 active:bg-blue-700">Зберегти</button>
             </div>
         </div>
     </div>
 
-    <div id="edit-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
-        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-yellow-500">Редагування Inbox</h2>
-                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
-            </div>
-            <div class="space-y-4">
-                <input type="hidden" id="edit-id">
-                <input type="text" id="edit-desc" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300">
-                <input type="number" id="edit-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-yellow-700 rounded-xl px-4 py-4 text-3xl font-bold text-center text-white">
-                <select id="edit-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
-                    <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
-                </select>
-                <button id="btn-submit-edit" class="w-full bg-yellow-600 text-white font-bold py-4 rounded-xl mt-4 active:bg-yellow-700">Оновити</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        const PIN = "1237";
+        const PIN = "1236";
         let currentPin = "";
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbysKTFjH5vvIcYyBFByPl314qOSLj6QuSzmBtzkhd4hTeDr8xcDma_h_hz87LvnfZyLOg/exec";
 
@@ -207,9 +218,7 @@
                 if (key === 'C') currentPin = currentPin.slice(0, -1);
                 else if (key === 'ID') return;
                 else if (currentPin.length < 4) currentPin += key;
-                
                 document.querySelectorAll('.pin-dot').forEach((dot, i) => dot.classList.toggle('bg-blue-500', i < currentPin.length));
-                
                 if (currentPin.length === 4) {
                     setTimeout(() => {
                         if (currentPin === PIN) {
@@ -227,7 +236,6 @@
             numpad.appendChild(btn);
         });
 
-        // Tabs
         function switchTab(tab) {
             ['overview', 'inbox', 'analytics'].forEach(v => {
                 document.getElementById(`view-${v}`).classList.toggle('hidden', v !== tab);
@@ -237,7 +245,6 @@
             if (tab === 'analytics') updateAnalytics();
         }
 
-        // Data Sync
         let globalTransactions = [];
         async function syncData() {
             const btn = document.getElementById('btn-sync');
@@ -280,56 +287,108 @@
             if (inxCount === 0) inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
         }
 
+        // --- Inbox Edit & Split Logic ---
+        let isSplitActive = false;
+        function toggleSplitMode() {
+            isSplitActive = !isSplitActive;
+            const container = document.getElementById('split-container');
+            const btnAdd = document.getElementById('btn-add-split-row');
+            container.classList.toggle('hidden', !isSplitActive);
+            btnAdd.classList.toggle('hidden', !isSplitActive);
+            if (isSplitActive && container.children.length === 0) {
+                addSplitRow(); addSplitRow();
+            }
+        }
+
+        function addSplitRow() {
+            const container = document.getElementById('split-container');
+            const row = document.createElement('div');
+            row.className = "flex gap-2 items-center bg-gray-800/80 p-2 rounded-xl border border-gray-700";
+            row.innerHTML = `
+                <input type="number" placeholder="Сума" class="w-24 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-sm text-white font-bold split-amount">
+                <select class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white split-cat">
+                    <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
+                </select>
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-2">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function openEdit(id) {
+            const tx = globalTransactions.find(t => t.id === id); if(!tx) return;
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-desc').value = tx.description;
+            document.getElementById('edit-amount').value = tx.amount;
+            isSplitActive = false;
+            document.getElementById('split-container').innerHTML = '';
+            document.getElementById('split-container').classList.add('hidden');
+            document.getElementById('btn-add-split-row').classList.add('hidden');
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        document.getElementById('btn-submit-edit').onclick = async () => {
+            const id = document.getElementById('edit-id').value;
+            const desc = document.getElementById('edit-desc').value;
+            
+            if (isSplitActive) {
+                const rows = document.querySelectorAll('#split-container > div');
+                let splits = [];
+                let total = 0;
+                rows.forEach(r => {
+                    const amt = parseFloat(r.querySelector('.split-amount').value) || 0;
+                    const cat = r.querySelector('.split-cat').value;
+                    if (amt > 0) { splits.push({ amount: amt, category: cat, description: desc }); total += amt; }
+                });
+                if (splits.length < 2) return alert("Потрібно мінімум 2 частини для спліту");
+                
+                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "split", id, splits }) });
+                if ((await res.json()).status === "success") { document.getElementById('edit-modal').classList.add('hidden'); syncData(); }
+            } else {
+                const amount = document.getElementById('edit-amount').value;
+                const cat = document.getElementById('edit-category').value;
+                const p = { action: "edit", id, amount, category: cat, description: desc };
+                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) });
+                if ((await res.json()).status === "success") { document.getElementById('edit-modal').classList.add('hidden'); syncData(); }
+            }
+        };
+
         // Analytics & Periods
-        let chartInstance = null;
-        let excludedCats = new Set();
+        let chartInstance = null; let excludedCats = new Set();
         const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1'];
-        
-        let actPeriod = 'month';
-        let pOffset = 0;
-        const monthGen = ["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+        let actPeriod = 'month'; let pOffset = 0;
         const monthNom = ["Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"];
 
         function toggleCustomDates() { document.getElementById('custom-date-inputs').classList.toggle('hidden'); document.getElementById('custom-date-inputs').classList.toggle('flex'); }
 
-        function setPeriodType(type) {
-            actPeriod = type; pOffset = 0;
-            if (type !== 'custom') document.getElementById('custom-date-inputs').classList.replace('flex', 'hidden');
-            document.getElementById('period-modal').classList.add('hidden');
-            updateAnalytics();
-        }
-
-        function changePeriodOffset(dir) {
-            if (actPeriod === 'all' || actPeriod === 'custom') return;
-            pOffset += dir; updateAnalytics();
-        }
+        function setPeriodType(type) { actPeriod = type; pOffset = 0; document.getElementById('period-modal').classList.add('hidden'); updateAnalytics(); }
+        function changePeriodOffset(dir) { if (actPeriod === 'all' || actPeriod === 'custom') return; pOffset += dir; updateAnalytics(); }
 
         function getPeriodRange() {
-            const now = new Date();
-            const y = now.getFullYear(); const m = now.getMonth(); const d = now.getDate();
-            let start, end, label;
-
-            if (actPeriod === 'all') {
-                start = new Date(2000, 0, 1); end = new Date(2100, 0, 1); label = 'Весь час';
-            } else if (actPeriod === 'year') {
-                start = new Date(y + pOffset, 0, 1); end = new Date(y + pOffset, 11, 31, 23, 59, 59); label = `${y + pOffset} рік`;
-            } else if (actPeriod === 'month') {
-                start = new Date(y, m + pOffset, 1); end = new Date(y, m + pOffset + 1, 0, 23, 59, 59);
-                label = `${monthNom[start.getMonth()]} ${start.getFullYear()}`;
-            } else if (actPeriod === 'week') {
-                const dayIdx = now.getDay() === 0 ? 6 : now.getDay() - 1;
-                start = new Date(y, m, d - dayIdx + (pOffset * 7));
-                end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59);
-                label = `${start.getDate()} ${monthGen[start.getMonth()]} - ${end.getDate()} ${monthGen[end.getMonth()]}`;
-            } else if (actPeriod === 'day') {
-                start = new Date(y, m, d + pOffset); end = new Date(y, m, d + pOffset, 23, 59, 59);
-                label = `${start.getDate()} ${monthGen[start.getMonth()]} ${start.getFullYear()}`;
-            } else if (actPeriod === 'custom') {
-                const sV = document.getElementById('date-start').value; const eV = document.getElementById('date-end').value;
-                start = sV ? new Date(sV) : new Date(2000,0,1); end = eV ? new Date(eV) : new Date(); end.setHours(23, 59, 59);
-                label = `${start.getDate()}.${start.getMonth()+1}.${start.getFullYear().toString().slice(-2)} - ${end.getDate()}.${end.getMonth()+1}.${end.getFullYear().toString().slice(-2)}`;
+            const now = new Date(); const y = now.getFullYear(); const m = now.getMonth(); const d = now.getDate();
+            if (actPeriod === 'all') return { start: new Date(2000,0,1), end: new Date(2100,0,1), label: 'Весь час' };
+            if (actPeriod === 'year') {
+                const start = new Date(y + pOffset, 0, 1); const end = new Date(y + pOffset, 11, 31, 23, 59, 59);
+                return { start, end, label: `${y + pOffset} рік` };
             }
-            return { start, end, label };
+            if (actPeriod === 'month') {
+                const start = new Date(y, m + pOffset, 1); const end = new Date(y, m + pOffset + 1, 0, 23, 59, 59);
+                return { start, end, label: `${monthNom[start.getMonth()]} ${start.getFullYear()}` };
+            }
+            if (actPeriod === 'week') {
+                const dayIdx = now.getDay() === 0 ? 6 : now.getDay() - 1;
+                const start = new Date(y, m, d - dayIdx + (pOffset * 7));
+                const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59);
+                return { start, end, label: 'Тиждень' };
+            }
+            if (actPeriod === 'day') {
+                const start = new Date(y, m, d + pOffset); const end = new Date(y, m, d + pOffset, 23, 59, 59);
+                return { start, end, label: `${start.getDate()} ${monthNom[start.getMonth()]}` };
+            }
+            if (actPeriod === 'custom') {
+                const sV = document.getElementById('date-start').value; const eV = document.getElementById('date-end').value;
+                const start = sV ? new Date(sV) : new Date(2000,0,1); const end = eV ? new Date(eV) : new Date(); end.setHours(23, 59, 59);
+                return { start, end, label: 'Кастом' };
+            }
         }
 
         function parseTxDate(dateStr) {
@@ -346,21 +405,14 @@
         function updateAnalytics() {
             const range = getPeriodRange();
             document.getElementById('period-label').textContent = range.label;
-            
             const btnPrev = document.getElementById('btn-period-prev');
             const btnNext = document.getElementById('btn-period-next');
             const noArrows = (actPeriod === 'all' || actPeriod === 'custom');
             btnPrev.style.opacity = noArrows ? '0.3' : '1'; btnNext.style.opacity = noArrows ? '0.3' : '1';
 
-            let expenses = globalTransactions.filter(tx => {
-                if (tx.type !== 'Expense') return false;
-                const d = parseTxDate(tx.date);
-                return d >= range.start && d <= range.end;
-            });
+            let expenses = globalTransactions.filter(tx => tx.type === 'Expense' && parseTxDate(tx.date) >= range.start && parseTxDate(tx.date) <= range.end);
 
-            const totals = {};
-            expenses.forEach(tx => totals[tx.category || 'Інше'] = (totals[tx.category || 'Інше'] || 0) + parseFloat(tx.amount));
-
+            const totals = {}; expenses.forEach(tx => totals[tx.category || 'Інше'] = (totals[tx.category || 'Інше'] || 0) + parseFloat(tx.amount));
             const labels = []; const data = []; let activeSum = 0;
             Object.keys(totals).forEach(c => { if (!excludedCats.has(c)) activeSum += totals[c]; });
             Object.keys(totals).sort((a,b) => totals[b]-totals[a]).forEach(cat => {
@@ -376,14 +428,8 @@
                 const pct = (!isExc && activeSum > 0) ? ((sum / activeSum) * 100).toFixed(1) : 0;
                 cont.innerHTML += `
                 <div class="flex justify-between items-center bg-gray-800/40 p-3 rounded-xl border border-gray-700 cursor-pointer ${isExc ? 'opacity-40 grayscale' : ''}" onclick="toggleCat('${cat}')">
-                    <div class="flex items-center gap-3">
-                        <div class="w-3 h-3 rounded-full" style="background-color: ${isExc ? '#4b5563' : color}"></div>
-                        <span class="text-sm font-medium text-gray-200">${cat}</span>
-                    </div>
-                    <div class="text-right">
-                        ${!isExc ? `<span class="text-xs text-gray-400 mr-2">${pct}%</span>` : ''}
-                        <span class="text-sm font-bold text-gray-100">${sum.toFixed(2)}</span>
-                    </div>
+                    <div class="flex items-center gap-3"><div class="w-3 h-3 rounded-full" style="background-color: ${isExc ? '#4b5563' : color}"></div><span class="text-sm font-medium text-gray-200">${cat}</span></div>
+                    <div class="text-right">${!isExc ? `<span class="text-xs text-gray-400 mr-2">${pct}%</span>` : ''}<span class="text-sm font-bold text-gray-100">${sum.toFixed(2)}</span></div>
                 </div>`;
             });
         }
@@ -397,10 +443,9 @@
             }
             chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false } } } });
         }
-
         function toggleCat(cat) { excludedCats.has(cat) ? excludedCats.delete(cat) : excludedCats.add(cat); updateAnalytics(); }
 
-        // Core Forms Logic
+        // Add Modal
         let currentTxType = 'Expense';
         document.getElementById('btn-add-modal').onclick = () => document.getElementById('add-modal').classList.remove('hidden');
         document.querySelectorAll('.tx-type-btn').forEach(btn => btn.onclick = (e) => {
@@ -412,19 +457,7 @@
         document.getElementById('btn-submit-tx').onclick = async () => {
             const p = { source: "pwa", type: currentTxType, date: new Date().toISOString(), amount: document.getElementById('input-amount').value, accountFrom: currentTxType === 'Expense' ? 'Everyday' : '', accountTo: currentTxType === 'Income' ? 'Everyday' : '', category: document.getElementById('input-category').value, description: document.getElementById('input-desc').value };
             if (!p.amount || p.amount <= 0) return alert("Введіть суму");
-            document.getElementById('btn-submit-tx').disabled = true;
-            if (!navigator.onLine) { let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; q.push(p); localStorage.setItem('offlineTxQueue', JSON.stringify(q)); document.getElementById('add-modal').classList.add('hidden'); document.getElementById('btn-submit-tx').disabled = false; return syncData(); }
-            try { await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) }); document.getElementById('add-modal').classList.add('hidden'); syncData(); } finally { document.getElementById('btn-submit-tx').disabled = false; }
-        };
-
-        function openEdit(id) {
-            const tx = globalTransactions.find(t => t.id === id); if(!tx) return;
-            document.getElementById('edit-id').value = id; document.getElementById('edit-desc').value = tx.description; document.getElementById('edit-amount').value = tx.amount; document.getElementById('edit-modal').classList.remove('hidden');
-        }
-        document.getElementById('btn-submit-edit').onclick = async () => {
-            const p = { action: "edit", id: document.getElementById('edit-id').value, amount: document.getElementById('edit-amount').value, category: document.getElementById('edit-category').value, description: document.getElementById('edit-desc').value };
-            if (!p.amount) return alert("Введіть суму");
-            try { await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) }); document.getElementById('edit-modal').classList.add('hidden'); syncData(); } catch(e){}
+            try { await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) }); document.getElementById('add-modal').classList.add('hidden'); syncData(); } catch(e){}
         };
         async function processOfflineQueue() {
             let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; if (q.length === 0) return; let rem = [];
