@@ -267,22 +267,37 @@
             txCont.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>';
             inxCont.innerHTML = '';
             let inxCount = 0;
-            if (globalTransactions.length === 0) return txCont.innerHTML += `<div class="p-4 text-center text-gray-500 text-sm">Немає транзакцій.</div>`;
+            
+            if (globalTransactions.length === 0) {
+                txCont.innerHTML += `<div class="p-4 text-center text-gray-500 text-sm">Немає транзакцій.</div>`;
+                document.getElementById('inbox-badge').classList.add('hidden');
+                inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
+                return;
+            }
 
             globalTransactions.forEach(tx => {
                 const isExp = tx.type === 'Expense';
                 const isInbox = tx.category === 'Нерозподілене' || tx.category === '⚠️ Очікує конвертації';
+                
+                // Клік (openEdit) та стилі курсора тепер доступні для всіх карток
                 const html = `
-                <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border border-gray-800 ${isInbox ? 'active:bg-gray-700 cursor-pointer border-yellow-600/30' : ''}" 
-                     ${isInbox ? `onclick="openEdit('${tx.id}')"` : ''}>
+                <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border ${isInbox ? 'border-yellow-600/30' : 'border-gray-800'} active:bg-gray-700 cursor-pointer" 
+                     onclick="openEdit('${tx.id}')">
                     <div>
                         <p class="font-medium text-gray-200">${tx.description || tx.category}</p>
                         <p class="text-xs ${isInbox ? 'text-yellow-500' : 'text-gray-500'} mt-1">${tx.category} • ${tx.date}</p>
                     </div>
                     <p class="font-bold ${isExp ? 'text-gray-100' : 'text-green-400'}">${isExp ? '-' : '+'}${parseFloat(tx.amount).toFixed(2)}</p>
                 </div>`;
-                if (isInbox) { inxCont.innerHTML += html; inxCount++; } else txCont.innerHTML += html;
+                
+                if (isInbox) { 
+                    inxCont.innerHTML += html; 
+                    inxCount++; 
+                } else { 
+                    txCont.innerHTML += html; 
+                }
             });
+            
             document.getElementById('inbox-badge').classList.toggle('hidden', inxCount === 0);
             if (inxCount === 0) inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
         }
