@@ -35,8 +35,6 @@
 
     <!-- Main App Layout -->
     <div id="app-screen" class="hidden h-screen flex-col relative">
-        
-        <!-- Header -->
         <header class="safe-pt px-4 pb-3 border-b border-gray-800 flex justify-between items-end shrink-0 bg-gray-900/95 backdrop-blur z-10">
             <h1 class="text-2xl font-bold tracking-tight" id="header-title">Огляд</h1>
             <button id="btn-sync" class="text-blue-400 font-semibold text-sm py-1 px-2 bg-blue-500/10 rounded-lg active:bg-blue-500/20 transition-colors">Синхронізувати</button>
@@ -52,42 +50,31 @@
                     <span class="text-gray-400 font-semibold text-lg">PLN</span>
                 </div>
             </div>
-            <div class="space-y-3" id="transactions-container">
-                <h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>
-            </div>
+            <div class="space-y-3" id="transactions-container"></div>
         </main>
 
         <!-- View: Inbox -->
         <main id="view-inbox" class="hidden flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar bg-gray-900">
             <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 mb-4">
-                <p class="text-yellow-400 text-sm font-medium">Транзакції, що потребують уточнення категорії або суми конвертації.</p>
+                <p class="text-yellow-400 text-sm font-medium">Транзакції, що потребують уточнення категорії.</p>
             </div>
             <div class="space-y-3" id="inbox-container"></div>
         </main>
 
         <!-- View: Analytics -->
         <main id="view-analytics" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar bg-gray-900">
-            <div class="space-y-3">
-                <select id="analytics-period-type" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none focus:outline-none focus:border-blue-500" onchange="handlePeriodChange()">
-                    <option value="current_month">Поточний місяць</option>
-                    <option value="prev_month">Минулий місяць</option>
-                    <option value="week">Останні 7 днів</option>
-                    <option value="all">За весь час</option>
-                    <option value="custom">Довільний період (Кастом)</option>
-                </select>
-                
-                <div id="custom-date-range" class="hidden flex-row gap-3">
-                    <div class="flex-1">
-                        <label class="text-xs text-gray-400 ml-1 mb-1 block">З дати</label>
-                        <input type="date" id="date-start" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none" onchange="updateAnalytics()">
-                    </div>
-                    <div class="flex-1">
-                        <label class="text-xs text-gray-400 ml-1 mb-1 block">По дату</label>
-                        <input type="date" id="date-end" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none" onchange="updateAnalytics()">
-                    </div>
-                </div>
+            
+            <!-- Period Selector Bar -->
+            <div class="flex items-center justify-between bg-gray-800 rounded-2xl p-1 shadow-sm border border-gray-700/50">
+                <button onclick="changePeriodOffset(-1)" id="btn-period-prev" class="p-3 text-gray-400 active:bg-gray-700 rounded-xl transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                <button onclick="document.getElementById('period-modal').classList.remove('hidden')" class="flex-1 py-3 text-sm font-bold text-center flex items-center justify-center gap-2 active:bg-gray-700 rounded-xl transition-colors">
+                    <span id="period-label">Жовтень 2026</span>
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <button onclick="changePeriodOffset(1)" id="btn-period-next" class="p-3 text-gray-400 active:bg-gray-700 rounded-xl transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
             </div>
             
+            <!-- Chart -->
             <div class="relative w-56 h-56 mx-auto my-4">
                 <canvas id="analytics-chart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
@@ -99,32 +86,70 @@
             <div class="space-y-2" id="analytics-categories"></div>
         </main>
 
-        <!-- FAB Add Button -->
+        <!-- FAB -->
         <button id="btn-add-modal" class="absolute bottom-24 right-4 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-600/30 active:bg-blue-700 transition-transform active:scale-95 z-20">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
         </button>
 
-        <!-- Bottom Navigation -->
+        <!-- Nav -->
         <nav class="safe-pb pt-2 px-2 border-t border-gray-800 flex justify-around shrink-0 bg-gray-900/95 backdrop-blur z-10">
-            <button id="nav-overview" class="p-2 text-blue-400 flex flex-col items-center gap-1.5 w-16 nav-btn" onclick="switchTab('overview')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                <span class="text-[10px] font-bold">Огляд</span>
-            </button>
-            <button id="nav-inbox" class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16 relative nav-btn" onclick="switchTab('inbox')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
-                <span class="text-[10px] font-bold">Inbox</span>
-                <span id="inbox-badge" class="absolute top-1 right-2 flex h-2.5 w-2.5 rounded-full bg-red-500 hidden border-2 border-gray-900"></span>
-            </button>
-            <button id="nav-analytics" class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16 nav-btn" onclick="switchTab('analytics')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                <span class="text-[10px] font-bold">Аналітика</span>
-            </button>
+            <button id="nav-overview" class="p-2 text-blue-400 flex flex-col items-center gap-1.5 w-16" onclick="switchTab('overview')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span class="text-[10px] font-bold">Огляд</span></button>
+            <button id="nav-inbox" class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16 relative" onclick="switchTab('inbox')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg><span class="text-[10px] font-bold">Inbox</span><span id="inbox-badge" class="absolute top-1 right-2 flex h-2.5 w-2.5 rounded-full bg-red-500 hidden border-2 border-gray-900"></span></button>
+            <button id="nav-analytics" class="p-2 text-gray-500 flex flex-col items-center gap-1.5 w-16" onclick="switchTab('analytics')"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg><span class="text-[10px] font-bold">Аналітика</span></button>
         </nav>
     </div>
 
-    <!-- Modals -->
-    <div id="add-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
+    <!-- Period Selection Modal -->
+    <div id="period-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
         <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb transform transition-transform border-t border-gray-800">
+            <h2 class="text-xl font-bold mb-6 text-center">Проміжок часу</h2>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="setPeriodType('all')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
+                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="text-sm font-semibold">Весь час</span>
+                </button>
+                <button onclick="setPeriodType('year')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
+                    <span class="text-xl font-bold text-gray-400">365</span>
+                    <span class="text-sm font-semibold">Рік</span>
+                </button>
+                <button onclick="setPeriodType('month')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
+                    <span class="text-xl font-bold text-gray-400">30</span>
+                    <span class="text-sm font-semibold">Місяць</span>
+                </button>
+                <button onclick="setPeriodType('week')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
+                    <span class="text-xl font-bold text-gray-400">7</span>
+                    <span class="text-sm font-semibold">Тиждень</span>
+                </button>
+                <button onclick="setPeriodType('day')" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
+                    <span class="text-xl font-bold text-gray-400">1</span>
+                    <span class="text-sm font-semibold">День</span>
+                </button>
+                <button onclick="toggleCustomDates()" class="bg-gray-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 active:bg-gray-700 border border-gray-700">
+                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    <span class="text-sm font-semibold">Діапазон</span>
+                </button>
+            </div>
+
+            <div id="custom-date-inputs" class="hidden flex-col gap-3 mb-6 bg-gray-800 p-4 rounded-2xl border border-gray-700">
+                <div class="flex items-center gap-3">
+                    <span class="text-gray-400 text-sm w-8">Від</span>
+                    <input type="date" id="date-start" class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white">
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-gray-400 text-sm w-8">До</span>
+                    <input type="date" id="date-end" class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white">
+                </div>
+                <button onclick="setPeriodType('custom')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-2 active:bg-blue-700">Застосувати</button>
+            </div>
+
+            <button onclick="document.getElementById('period-modal').classList.add('hidden')" class="w-full text-blue-400 font-semibold py-4">Скасувати</button>
+        </div>
+    </div>
+
+    <!-- Modals Add/Edit -->
+    <div id="add-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
+        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold">Нова операція</h2>
                 <button onclick="document.getElementById('add-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
@@ -136,56 +161,43 @@
                 </div>
                 <input type="number" id="input-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-4 text-3xl font-bold text-center text-white">
                 <div class="grid grid-cols-2 gap-3">
-                    <select id="input-account" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none"><option value="Everyday">Everyday</option><option value="Cash">Cash</option></select>
+                    <select id="input-account" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none"><option value="Everyday">Everyday</option></select>
                     <select id="input-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
                         <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
                     </select>
                 </div>
                 <input type="text" id="input-desc" placeholder="Коментар" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white">
-                <button id="btn-submit-tx" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-2 active:bg-blue-700 shadow-lg shadow-blue-600/20">Зберегти</button>
+                <button id="btn-submit-tx" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-2 active:bg-blue-700">Зберегти</button>
             </div>
         </div>
     </div>
 
     <div id="edit-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex-col justify-end">
-        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb transform transition-transform border-t border-gray-800">
+        <div class="bg-gray-900 rounded-t-3xl p-6 safe-pb border-t border-gray-800">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold text-yellow-500">Редагування Inbox</h2>
                 <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="p-2 text-gray-400"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
             <div class="space-y-4">
                 <input type="hidden" id="edit-id">
-                <div>
-                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Опис</label>
-                    <input type="text" id="edit-desc" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Сума (PLN)</label>
-                    <input type="number" id="edit-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-yellow-700 rounded-xl px-4 py-4 text-3xl font-bold text-center text-white">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-400 ml-1 mb-1 block">Категорія</label>
-                    <select id="edit-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
-                        <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
-                    </select>
-                </div>
+                <input type="text" id="edit-desc" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300">
+                <input type="number" id="edit-amount" inputmode="decimal" placeholder="0.00" class="w-full bg-gray-800 border border-yellow-700 rounded-xl px-4 py-4 text-3xl font-bold text-center text-white">
+                <select id="edit-category" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white appearance-none">
+                    <option value="Продукти">Продукти</option><option value="Транспорт">Транспорт</option><option value="Розваги">Розваги</option><option value="Інше">Інше</option>
+                </select>
                 <button id="btn-submit-edit" class="w-full bg-yellow-600 text-white font-bold py-4 rounded-xl mt-4 active:bg-yellow-700">Оновити</button>
             </div>
         </div>
     </div>
 
     <script>
-        const PIN = "1235";
+        const PIN = "1233";
         let currentPin = "";
-        
-        // ВСТАВ СВІЙ АКТУАЛЬНИЙ URL ТУТ!
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbytL2ufOGqB41nK5Jb-N_NAvCirShM6NaBgq7D87s1_bp2NpA-cXTNLrOwjX-GLOPfp/exec";
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
-        }
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(console.error);
 
-        // Init Auth Numpad
+        // Auth
         const numpad = document.getElementById('numpad');
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 'ID', 0, 'C'].forEach(key => {
             const btn = document.createElement('button');
@@ -204,11 +216,9 @@
                             document.getElementById('auth-screen').classList.add('hidden');
                             document.getElementById('app-screen').classList.remove('hidden');
                             document.getElementById('app-screen').classList.add('flex');
-                            syncData();
-                            processOfflineQueue();
+                            syncData(); processOfflineQueue();
                         } else {
-                            currentPin = "";
-                            document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('bg-blue-500'));
+                            currentPin = ""; document.querySelectorAll('.pin-dot').forEach(dot => dot.classList.remove('bg-blue-500'));
                             if (navigator.vibrate) navigator.vibrate(200);
                         }
                     }, 100);
@@ -217,22 +227,17 @@
             numpad.appendChild(btn);
         });
 
-        // Tab Switcher
+        // Tabs
         function switchTab(tab) {
-            const views = ['overview', 'inbox', 'analytics'];
-            const titles = { 'overview': 'Огляд', 'inbox': 'Inbox', 'analytics': 'Аналітика' };
-            
-            views.forEach(v => {
+            ['overview', 'inbox', 'analytics'].forEach(v => {
                 document.getElementById(`view-${v}`).classList.toggle('hidden', v !== tab);
-                const nav = document.getElementById(`nav-${v}`);
-                nav.classList.toggle('text-blue-400', v === tab);
-                nav.classList.toggle('text-gray-500', v !== tab);
+                document.getElementById(`nav-${v}`).classList.replace(v === tab ? 'text-gray-500' : 'text-blue-400', v === tab ? 'text-blue-400' : 'text-gray-500');
             });
-            document.getElementById('header-title').textContent = titles[tab];
+            document.getElementById('header-title').textContent = { 'overview': 'Огляд', 'inbox': 'Inbox', 'analytics': 'Аналітика' }[tab];
             if (tab === 'analytics') updateAnalytics();
         }
 
-        // Fetch Data
+        // Data Sync
         let globalTransactions = [];
         async function syncData() {
             const btn = document.getElementById('btn-sync');
@@ -240,35 +245,26 @@
             try {
                 if (!navigator.onLine) return btn.textContent = "Офлайн";
                 const res = await fetch(WEB_APP_URL);
-                const data = await res.json();
-                
-                if(data.status === "success") {
+                if ((data = await res.json()).status === "success") {
                     document.getElementById('balance-display').textContent = data.balance;
                     globalTransactions = data.transactions;
-                    renderTransactions();
-                    updateAnalytics();
+                    renderTransactions(); updateAnalytics();
                 }
-            } catch (err) { console.error(err); } 
-            finally { if (navigator.onLine) btn.textContent = "Синхронізувати"; }
+            } catch (err) {} finally { if (navigator.onLine) btn.textContent = "Синхронізувати"; }
         }
         document.getElementById('btn-sync').addEventListener('click', syncData);
 
         function renderTransactions() {
             const txCont = document.getElementById('transactions-container');
             const inxCont = document.getElementById('inbox-container');
-            const badge = document.getElementById('inbox-badge');
-            
             txCont.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>';
             inxCont.innerHTML = '';
-            let inboxCount = 0;
-
-            if (globalTransactions.length === 0) return txCont.innerHTML += `<div class="bg-gray-800/50 rounded-2xl p-4 text-center text-gray-500 text-sm">Немає транзакцій.</div>`;
+            let inxCount = 0;
+            if (globalTransactions.length === 0) return txCont.innerHTML += `<div class="p-4 text-center text-gray-500 text-sm">Немає транзакцій.</div>`;
 
             globalTransactions.forEach(tx => {
-                const isExpense = tx.type === 'Expense';
-                const color = isExpense ? 'text-gray-100' : 'text-green-400';
+                const isExp = tx.type === 'Expense';
                 const isInbox = tx.category === 'Нерозподілене' || tx.category === '⚠️ Очікує конвертації';
-                
                 const html = `
                 <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border border-gray-800 ${isInbox ? 'active:bg-gray-700 cursor-pointer border-yellow-600/30' : ''}" 
                      ${isInbox ? `onclick="openEdit('${tx.id}')"` : ''}>
@@ -276,32 +272,64 @@
                         <p class="font-medium text-gray-200">${tx.description || tx.category}</p>
                         <p class="text-xs ${isInbox ? 'text-yellow-500' : 'text-gray-500'} mt-1">${tx.category} • ${tx.date}</p>
                     </div>
-                    <p class="font-bold ${color}">${isExpense ? '-' : '+'}${parseFloat(tx.amount).toFixed(2)}</p>
+                    <p class="font-bold ${isExp ? 'text-gray-100' : 'text-green-400'}">${isExp ? '-' : '+'}${parseFloat(tx.amount).toFixed(2)}</p>
                 </div>`;
-                
-                if (isInbox) { inxCont.innerHTML += html; inboxCount++; } else { txCont.innerHTML += html; }
+                if (isInbox) { inxCont.innerHTML += html; inxCount++; } else txCont.innerHTML += html;
             });
-
-            badge.classList.toggle('hidden', inboxCount === 0);
-            if (inboxCount === 0) inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
+            document.getElementById('inbox-badge').classList.toggle('hidden', inxCount === 0);
+            if (inxCount === 0) inxCont.innerHTML = `<div class="text-center text-gray-500 py-8">Inbox порожній 🎉</div>`;
         }
 
-        // --- Analytics Logic ---
+        // Analytics & Periods
         let chartInstance = null;
         let excludedCats = new Set();
         const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1'];
+        
+        let actPeriod = 'month';
+        let pOffset = 0;
+        const monthGen = ["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+        const monthNom = ["Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"];
 
-        function handlePeriodChange() {
-            const type = document.getElementById('analytics-period-type').value;
-            const customWrap = document.getElementById('custom-date-range');
-            if (type === 'custom') {
-                customWrap.classList.remove('hidden');
-                customWrap.classList.add('flex');
-            } else {
-                customWrap.classList.add('hidden');
-                customWrap.classList.remove('flex');
-            }
+        function toggleCustomDates() { document.getElementById('custom-date-inputs').classList.toggle('hidden'); document.getElementById('custom-date-inputs').classList.toggle('flex'); }
+
+        function setPeriodType(type) {
+            actPeriod = type; pOffset = 0;
+            if (type !== 'custom') document.getElementById('custom-date-inputs').classList.replace('flex', 'hidden');
+            document.getElementById('period-modal').classList.add('hidden');
             updateAnalytics();
+        }
+
+        function changePeriodOffset(dir) {
+            if (actPeriod === 'all' || actPeriod === 'custom') return;
+            pOffset += dir; updateAnalytics();
+        }
+
+        function getPeriodRange() {
+            const now = new Date();
+            const y = now.getFullYear(); const m = now.getMonth(); const d = now.getDate();
+            let start, end, label;
+
+            if (actPeriod === 'all') {
+                start = new Date(2000, 0, 1); end = new Date(2100, 0, 1); label = 'Весь час';
+            } else if (actPeriod === 'year') {
+                start = new Date(y + pOffset, 0, 1); end = new Date(y + pOffset, 11, 31, 23, 59, 59); label = `${y + pOffset} рік`;
+            } else if (actPeriod === 'month') {
+                start = new Date(y, m + pOffset, 1); end = new Date(y, m + pOffset + 1, 0, 23, 59, 59);
+                label = `${monthNom[start.getMonth()]} ${start.getFullYear()}`;
+            } else if (actPeriod === 'week') {
+                const dayIdx = now.getDay() === 0 ? 6 : now.getDay() - 1;
+                start = new Date(y, m, d - dayIdx + (pOffset * 7));
+                end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59);
+                label = `${start.getDate()} ${monthGen[start.getMonth()]} - ${end.getDate()} ${monthGen[end.getMonth()]}`;
+            } else if (actPeriod === 'day') {
+                start = new Date(y, m, d + pOffset); end = new Date(y, m, d + pOffset, 23, 59, 59);
+                label = `${start.getDate()} ${monthGen[start.getMonth()]} ${start.getFullYear()}`;
+            } else if (actPeriod === 'custom') {
+                const sV = document.getElementById('date-start').value; const eV = document.getElementById('date-end').value;
+                start = sV ? new Date(sV) : new Date(2000,0,1); end = eV ? new Date(eV) : new Date(); end.setHours(23, 59, 59);
+                label = `${start.getDate()}.${start.getMonth()+1}.${start.getFullYear().toString().slice(-2)} - ${end.getDate()}.${end.getMonth()+1}.${end.getFullYear().toString().slice(-2)}`;
+            }
+            return { start, end, label };
         }
 
         function parseTxDate(dateStr) {
@@ -316,194 +344,94 @@
         }
 
         function updateAnalytics() {
-            const period = document.getElementById('analytics-period-type').value;
-            const now = new Date();
-            let expenses = globalTransactions.filter(tx => tx.type === 'Expense');
+            const range = getPeriodRange();
+            document.getElementById('period-label').textContent = range.label;
+            
+            const btnPrev = document.getElementById('btn-period-prev');
+            const btnNext = document.getElementById('btn-period-next');
+            const noArrows = (actPeriod === 'all' || actPeriod === 'custom');
+            btnPrev.style.opacity = noArrows ? '0.3' : '1'; btnNext.style.opacity = noArrows ? '0.3' : '1';
 
-            // Filter Dates
-            expenses = expenses.filter(tx => {
-                if (period === 'all') return true;
+            let expenses = globalTransactions.filter(tx => {
+                if (tx.type !== 'Expense') return false;
                 const d = parseTxDate(tx.date);
-                
-                if (period === 'current_month') {
-                    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-                }
-                if (period === 'prev_month') {
-                    let prevMonth = now.getMonth() - 1;
-                    let year = now.getFullYear();
-                    if (prevMonth < 0) { prevMonth = 11; year -= 1; }
-                    return d.getMonth() === prevMonth && d.getFullYear() === year;
-                }
-                if (period === 'week') {
-                    const diffDays = Math.ceil(Math.abs(now - d) / (1000 * 60 * 60 * 24));
-                    return diffDays <= 7;
-                }
-                if (period === 'custom') {
-                    const sVal = document.getElementById('date-start').value;
-                    const eVal = document.getElementById('date-end').value;
-                    if (!sVal || !eVal) return true;
-                    const start = new Date(sVal);
-                    const end = new Date(eVal);
-                    end.setHours(23, 59, 59, 999);
-                    return d >= start && d <= end;
-                }
-                return true;
+                return d >= range.start && d <= range.end;
             });
 
             const totals = {};
-            expenses.forEach(tx => {
-                const cat = tx.category || 'Інше';
-                totals[cat] = (totals[cat] || 0) + parseFloat(tx.amount);
+            expenses.forEach(tx => totals[tx.category || 'Інше'] = (totals[tx.category || 'Інше'] || 0) + parseFloat(tx.amount));
+
+            const labels = []; const data = []; let activeSum = 0;
+            Object.keys(totals).forEach(c => { if (!excludedCats.has(c)) activeSum += totals[c]; });
+            Object.keys(totals).sort((a,b) => totals[b]-totals[a]).forEach(cat => {
+                if (!excludedCats.has(cat)) { labels.push(cat); data.push(totals[cat]); }
             });
 
-            const labels = [];
-            const data = [];
-            let activeTotalSum = 0;
-
-            // Compute active total sum first for percentage calculation
-            Object.keys(totals).forEach(cat => {
-                if (!excludedCats.has(cat)) activeTotalSum += totals[cat];
-            });
-
-            Object.keys(totals).sort((a,b) => totals[b]-totals[a]).forEach((cat, i) => {
-                if (!excludedCats.has(cat)) {
-                    labels.push(cat);
-                    data.push(totals[cat]);
-                }
-            });
-
-            document.getElementById('analytics-total').textContent = activeTotalSum.toFixed(2);
+            document.getElementById('analytics-total').textContent = activeSum.toFixed(2);
             renderChart(labels, data);
-            renderCatList(totals, activeTotalSum);
-        }
-
-        function renderChart(labels, data) {
-            const ctx = document.getElementById('analytics-chart');
-            if (chartInstance) chartInstance.destroy();
             
-            if (data.length === 0) {
-                chartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: { labels: ['Немає даних'], datasets: [{ data: [1], backgroundColor: ['#374151'], borderWidth: 0 }] },
-                    options: { cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
-                });
-                return;
-            }
-
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
-                options: { cutout: '80%', plugins: { legend: { display: false } } }
-            });
-        }
-
-        function renderCatList(totals, activeTotalSum) {
-            const cont = document.getElementById('analytics-categories');
-            cont.innerHTML = '';
-            
+            const cont = document.getElementById('analytics-categories'); cont.innerHTML = '';
             Object.entries(totals).sort((a,b) => b[1]-a[1]).forEach(([cat, sum], i) => {
-                const isExc = excludedCats.has(cat);
-                const color = colors[i % colors.length];
-                const percent = (!isExc && activeTotalSum > 0) ? ((sum / activeTotalSum) * 100).toFixed(1) : 0;
-                
+                const isExc = excludedCats.has(cat); const color = colors[i % colors.length];
+                const pct = (!isExc && activeSum > 0) ? ((sum / activeSum) * 100).toFixed(1) : 0;
                 cont.innerHTML += `
-                <div class="flex justify-between items-center bg-gray-800/40 p-3 rounded-xl border border-gray-700 cursor-pointer ${isExc ? 'opacity-40 grayscale' : ''}"
-                     onclick="toggleAnalyticsCat('${cat}')">
+                <div class="flex justify-between items-center bg-gray-800/40 p-3 rounded-xl border border-gray-700 cursor-pointer ${isExc ? 'opacity-40 grayscale' : ''}" onclick="toggleCat('${cat}')">
                     <div class="flex items-center gap-3">
                         <div class="w-3 h-3 rounded-full" style="background-color: ${isExc ? '#4b5563' : color}"></div>
                         <span class="text-sm font-medium text-gray-200">${cat}</span>
                     </div>
                     <div class="text-right">
-                        ${!isExc ? `<span class="text-xs text-gray-400 mr-2">${percent}%</span>` : ''}
+                        ${!isExc ? `<span class="text-xs text-gray-400 mr-2">${pct}%</span>` : ''}
                         <span class="text-sm font-bold text-gray-100">${sum.toFixed(2)}</span>
                     </div>
                 </div>`;
             });
         }
 
-        function toggleAnalyticsCat(cat) {
-            if (excludedCats.has(cat)) excludedCats.delete(cat); else excludedCats.add(cat);
-            updateAnalytics();
+        function renderChart(labels, data) {
+            const ctx = document.getElementById('analytics-chart');
+            if (chartInstance) chartInstance.destroy();
+            if (data.length === 0) {
+                chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Немає'], datasets: [{ data: [1], backgroundColor: ['#374151'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } } } });
+                return;
+            }
+            chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false } } } });
         }
 
-        // Offline / Modals / Submit Logic 
-        const addModal = document.getElementById('add-modal');
+        function toggleCat(cat) { excludedCats.has(cat) ? excludedCats.delete(cat) : excludedCats.add(cat); updateAnalytics(); }
+
+        // Core Forms Logic
         let currentTxType = 'Expense';
-        document.getElementById('btn-add-modal').onclick = () => addModal.classList.remove('hidden');
-        
-        document.querySelectorAll('.tx-type-btn').forEach(btn => {
-            btn.onclick = (e) => {
-                document.querySelectorAll('.tx-type-btn').forEach(b => { b.classList.replace('bg-gray-700', 'text-gray-400'); b.classList.remove('text-white', 'shadow'); });
-                e.target.classList.replace('text-gray-400', 'bg-gray-700'); e.target.classList.add('text-white', 'shadow');
-                currentTxType = e.target.textContent === 'Витрата' ? 'Expense' : 'Income';
-            };
+        document.getElementById('btn-add-modal').onclick = () => document.getElementById('add-modal').classList.remove('hidden');
+        document.querySelectorAll('.tx-type-btn').forEach(btn => btn.onclick = (e) => {
+            document.querySelectorAll('.tx-type-btn').forEach(b => { b.classList.replace('bg-gray-700', 'text-gray-400'); b.classList.remove('text-white', 'shadow'); });
+            e.target.classList.replace('text-gray-400', 'bg-gray-700'); e.target.classList.add('text-white', 'shadow');
+            currentTxType = e.target.textContent === 'Витрата' ? 'Expense' : 'Income';
         });
 
+        document.getElementById('btn-submit-tx').onclick = async () => {
+            const p = { source: "pwa", type: currentTxType, date: new Date().toISOString(), amount: document.getElementById('input-amount').value, accountFrom: currentTxType === 'Expense' ? 'Everyday' : '', accountTo: currentTxType === 'Income' ? 'Everyday' : '', category: document.getElementById('input-category').value, description: document.getElementById('input-desc').value };
+            if (!p.amount || p.amount <= 0) return alert("Введіть суму");
+            document.getElementById('btn-submit-tx').disabled = true;
+            if (!navigator.onLine) { let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; q.push(p); localStorage.setItem('offlineTxQueue', JSON.stringify(q)); document.getElementById('add-modal').classList.add('hidden'); document.getElementById('btn-submit-tx').disabled = false; return syncData(); }
+            try { await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) }); document.getElementById('add-modal').classList.add('hidden'); syncData(); } finally { document.getElementById('btn-submit-tx').disabled = false; }
+        };
+
+        function openEdit(id) {
+            const tx = globalTransactions.find(t => t.id === id); if(!tx) return;
+            document.getElementById('edit-id').value = id; document.getElementById('edit-desc').value = tx.description; document.getElementById('edit-amount').value = tx.amount; document.getElementById('edit-modal').classList.remove('hidden');
+        }
+        document.getElementById('btn-submit-edit').onclick = async () => {
+            const p = { action: "edit", id: document.getElementById('edit-id').value, amount: document.getElementById('edit-amount').value, category: document.getElementById('edit-category').value, description: document.getElementById('edit-desc').value };
+            if (!p.amount) return alert("Введіть суму");
+            try { await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) }); document.getElementById('edit-modal').classList.add('hidden'); syncData(); } catch(e){}
+        };
         async function processOfflineQueue() {
-            let queue = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
-            if (queue.length === 0) return;
-            let remainingQueue = [];
-            for (let i = 0; i < queue.length; i++) {
-                try {
-                    const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(queue[i]) });
-                    if ((await res.json()).status !== "success") remainingQueue.push(queue[i]);
-                } catch { remainingQueue.push(queue[i]); break; }
-            }
-            localStorage.setItem('offlineTxQueue', JSON.stringify(remainingQueue));
-            if (remainingQueue.length < queue.length) syncData();
+            let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; if (q.length === 0) return; let rem = [];
+            for (let i of q) { try { if ((await (await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(i) })).json()).status !== "success") rem.push(i); } catch { rem.push(i); break; } }
+            localStorage.setItem('offlineTxQueue', JSON.stringify(rem)); if (rem.length < q.length) syncData();
         }
         window.addEventListener('online', processOfflineQueue);
-
-        document.getElementById('btn-submit-tx').onclick = async () => {
-            const payload = {
-                source: "pwa", type: currentTxType, date: new Date().toISOString(),
-                amount: document.getElementById('input-amount').value,
-                accountFrom: currentTxType === 'Expense' ? document.getElementById('input-account').value : "",
-                accountTo: currentTxType === 'Income' ? document.getElementById('input-account').value : "",
-                category: document.getElementById('input-category').value,
-                description: document.getElementById('input-desc').value
-            };
-            if (!payload.amount || payload.amount <= 0) return alert("Введіть суму");
-            document.getElementById('btn-submit-tx').disabled = true;
-            
-            if (!navigator.onLine) {
-                let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
-                q.push(payload); localStorage.setItem('offlineTxQueue', JSON.stringify(q));
-                addModal.classList.add('hidden');
-                document.getElementById('btn-submit-tx').disabled = false;
-                return syncData();
-            }
-            try {
-                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-                addModal.classList.add('hidden');
-                document.getElementById('input-amount').value = ''; document.getElementById('input-desc').value = '';
-                syncData();
-            } finally { document.getElementById('btn-submit-tx').disabled = false; }
-        };
-
-        const editModal = document.getElementById('edit-modal');
-        function openEdit(id) {
-            const tx = globalTransactions.find(t => t.id === id);
-            if(!tx) return;
-            document.getElementById('edit-id').value = id;
-            document.getElementById('edit-desc').value = tx.description;
-            document.getElementById('edit-amount').value = tx.amount > 0 ? tx.amount : '';
-            editModal.classList.remove('hidden');
-        }
-
-        document.getElementById('btn-submit-edit').onclick = async () => {
-            if (!navigator.onLine) return alert("Редагування Inbox можливе тільки онлайн.");
-            const btn = document.getElementById('btn-submit-edit');
-            const payload = { action: "edit", id: document.getElementById('edit-id').value, amount: document.getElementById('edit-amount').value, category: document.getElementById('edit-category').value, description: document.getElementById('edit-desc').value };
-            if (!payload.amount || payload.amount <= 0) return alert("Введіть суму");
-            btn.textContent = "Збереження..."; btn.disabled = true;
-
-            try {
-                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-                if ((await res.json()).status === "success") { editModal.classList.add('hidden'); syncData(); }
-            } catch (err) { alert("Помилка мережі"); } 
-            finally { btn.textContent = "Оновити"; btn.disabled = false; }
-        };
     </script>
 </body>
 </html>
