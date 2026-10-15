@@ -280,6 +280,113 @@
                 btn.disabled = false;
             }
         };
+        // --- Offline Queue Logic ---
+        
+        function saveOfflineTx(payload) {
+            let queue = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
+            queue.push(payload);
+            localStorage.setItem('offlineTxQueue', JSON.stringify(queue));
+            alert("Немає зв'язку. Операцію збережено локально.");
+            
+            // Локально оновлюємо UI, щоб користувач бачив зміни одразу
+            const txContainer = document.getElementById('transactions-container');
+            const isExpense = payload.type === 'Expense';
+            const sign = isExpense ? '-' : '+';
+            const color = isExpense ? 'text-gray-100' : 'text-green-400';
+            
+            // Видаляємо заглушку, якщо це перша транзакція
+            if (txContainer.innerHTML.includes('Немає транзакцій')) {
+                txContainer.innerHTML = '<h2 class="text-lg font-semibold text-gray-300">Останні операції</h2>';
+            }
+
+            const newTxHtml = `
+            <div class="bg-gray-800/50 rounded-2xl p-4 flex justify-between items-center border border-gray-800 opacity-50">
+                <div>
+                    <p class="font-medium text-gray-200">⏳ ${payload.description || payload.category}</p>
+                    <p class="text-xs text-yellow-500 mt-1">Очікує синхронізації</p>
+                </div>
+                <p class="font-bold ${color}">${sign}${parseFloat(payload.amount).toFixed(2)}</p>
+            </div>`;
+            
+            txContainer.insertAdjacentHTML('beforeend', newTxHtml);
+        }
+
+        async function processOfflineQueue() {
+            let queue = JSON.parse(localStorage.getItem('offlineTxQueue')) || [];
+            if (queue.length === 0) return;
+
+            console.log(`Знайдено ${queue.length} офлайн-транзакцій. Починаю синхронізацію...`);
+            let remainingQueue = [];
+
+            for (let i = 0; i < queue.length; i++) {
+                try {
+                    const res = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify(queue[i])
+                    });
+                    const result = await res.json();
+                    if (result.status !== "success") {
+                        console.error("Помилка запису офлайн транзакції:", result.message);
+                        remainingQueue.push(queue[i]); // Залишаємо в черзі при помилці БД
+                    }
+                } catch (err) {
+                    console.error("Мережа досі недоступна.");
+                    remainingQueue.push(queue[i]); // Залишаємо в черзі при помилці мережі
+                    break; // Перериваємо цикл, якщо немає інтернету
+                }
+            }
+
+            localStorage.setItem('offlineTxQueue', JSON.stringify(remainingQueue));
+            if (remainingQueue.length < queue.length) {
+                syncData(); // Оновлюємо UI, якщо хоча б щось відправилось
+            }
+        }
+
+        // Слухачі статусу мережі
+        window.addEventListener('online', processOfflineQueue);
+        
+        // --- Оновлення функції btn-submit-tx.onclick ---
+        // ЗНАЙДИ поточну функцію document.getElementById('btn-submit-tx').onclick = async () => { ... }
+        // ТА ЗАМІНИ БЛОК try...catch в ній на цей:
+        
+        /* 
+            try {
+                if (!navigator.onLine) {
+                    saveOfflineTx(payload);
+                    modal.classList.add('hidden');
+                    document.getElementById('input-amount').value = '';
+                    document.getElementById('input-desc').value = '';
+                    btn.textContent = "Зберегти";
+                    btn.disabled = false;
+                    return;
+                }
+
+                const res = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await res.json();
+                if (result.status === "success") {
+                    modal.classList.add('hidden');
+                    document.getElementById('input-amount').value = '';
+                    document.getElementById('input-desc').value = '';
+                    syncData();
+                } else {
+                    alert("Помилка БД: " + result.message);
+                }
+            } catch (err) {
+                saveOfflineTx(payload);
+                modal.classList.add('hidden');
+                document.getElementById('input-amount').value = '';
+                document.getElementById('input-desc').value = '';
+            } finally {
+                btn.textContent = "Зберегти";
+                btn.disabled = false;
+            }
+        */
     </script>
 </body>
 </html>
