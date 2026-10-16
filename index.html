@@ -36,14 +36,17 @@
 
     <!-- Main App Layout -->
     <div id="app-screen" class="hidden h-screen flex-col relative">
-        <!-- Sub-header for back navigation -->
+        <!-- Sub-header for Details views (Accounts / Categories) -->
         <header id="sub-header" class="hidden safe-pt px-5 pb-4 flex justify-between items-center shrink-0 z-10 bg-sumbg border-b border-[#1e2433]">
-            <button onclick="closeSubView()" class="p-2 text-sumtext active:bg-[#1e2433] rounded-xl flex items-center gap-1">
+            <button onclick="closeSubView()" class="p-2 text-sumtext active:bg-[#1e2433] rounded-xl flex items-center gap-1 -ml-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 <span class="text-sm font-semibold">Назад</span>
             </button>
-            <h1 class="text-lg font-bold text-white" id="sub-header-title">Деталі</h1>
-            <div class="w-10"></div> <!-- Placeholder for balance -->
+            <h1 class="text-lg font-bold text-white truncate px-2" id="sub-header-title">Деталі</h1>
+            <button id="btn-edit-balance" onclick="openBalanceModal()" class="p-2 text-sumblue active:bg-[#1e2433] rounded-xl hidden -mr-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+            </button>
+            <div id="sub-header-placeholder" class="w-9 hidden"></div>
         </header>
 
         <header id="main-header" class="safe-pt px-5 pb-4 flex justify-between items-center shrink-0 z-10 bg-sumbg">
@@ -124,9 +127,10 @@
             </div>
         </main>
 
+        <!-- View: Sub Transactions (Used for Account Details & Category Details) -->
         <main id="view-sub-transactions" class="hidden flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar z-10 pb-24">
              <div class="text-center pt-2 pb-6">
-                <p class="text-sumtext text-sm font-medium mb-1" id="sub-view-lbl">Категорія</p>
+                <p class="text-sumtext text-sm font-medium mb-1" id="sub-view-lbl">Баланс / Сума</p>
                 <p class="text-4xl font-bold text-white" id="sub-view-balance">0.00 PLN</p>
             </div>
             <div id="sub-transactions-container" class="space-y-3"></div>
@@ -147,7 +151,22 @@
         </nav>
     </div>
 
-    <!-- Modals -->
+    <!-- BALANCE CORRECTION MODAL -->
+    <div id="balance-modal" class="hidden fixed inset-0 bg-[#0b0e14]/90 z-50 flex-col justify-end transition-opacity">
+        <div class="bg-[#151923] rounded-t-[32px] p-6 safe-pb border-t border-[#2a2f3a]">
+            <div class="flex justify-between items-center mb-6 safe-pt mt-2">
+                <h2 class="text-xl font-bold text-white">Корекція балансу</h2>
+                <button onclick="document.getElementById('balance-modal').classList.add('hidden')" class="p-2 text-sumtext bg-[#1c212b] rounded-xl"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <div class="space-y-4">
+                <p class="text-xs text-sumtext">Введіть фактичний залишок на рахунку. Система створить коригуючу транзакцію, щоб цифри зійшлися.</p>
+                <div><label class="text-xs text-sumtext ml-1 block mb-1">Новий баланс (PLN)</label><input type="number" id="balance-input" inputmode="decimal" class="w-full bg-sumbg border border-[#2a2f3a] rounded-xl px-4 py-4 text-3xl font-bold text-center text-white focus:outline-none focus:border-sumblue"></div>
+                <button id="btn-save-balance" onclick="saveNewBalance()" class="w-full bg-sumblue text-white font-bold py-4 rounded-xl mt-2 active:opacity-80">Зберегти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TX MODAL -->
     <div id="tx-modal" class="hidden fixed inset-0 bg-[#0b0e14]/90 z-50 flex-col justify-end transition-opacity">
         <div class="bg-[#151923] rounded-t-[32px] p-6 safe-pb max-h-[90vh] overflow-y-auto border-t border-[#2a2f3a]">
             <div class="flex justify-between items-center mb-6 safe-pt mt-2">
@@ -203,7 +222,7 @@
     </div>
 
     <script>
-        const PIN = "1235"; let currentPin = "";
+        const PIN = "1234"; let currentPin = "";
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbysKTFjH5vvIcYyBFByPl314qOSLj6QuSzmBtzkhd4hTeDr8xcDma_h_hz87LvnfZyLOg/exec"; // <-- ВСТАВ СВІЙ URL ТУТ
 
         const fmt = (num) => parseFloat(num).toFixed(2) + ' PLN';
@@ -217,10 +236,10 @@
             'Дрібниці': '🛍️', 'Розваги': '🍿', 'Речі': '👕', 'Техніка': '💻', 
             'Здоров\'я: Аптека': '💊', 'Здоров\'я: Лікарі': '🩺', 
             'Зарплата': '💰', 'Відсотки': '📈', 'Подарунок': '🎁', 'Переказ': '⇄', 
-            '⚠️ Очікує конвертації': '⏳', 'Нерозподілене': '❓', 'Інше': '📦' 
+            'Корекція': '🔧', '⚠️ Очікує конвертації': '⏳', 'Нерозподілене': '❓', 'Інше': '📦' 
         };
         const getIcon = (cat) => catIcons[cat] || '💳';
-        const expCats = Object.keys(catIcons).filter(c => !['Зарплата','Відсотки','Подарунок','Переказ','⚠️ Очікує конвертації','Нерозподілене','Інше'].includes(c));
+        const expCats = Object.keys(catIcons).filter(c => !['Зарплата','Відсотки','Подарунок','Переказ','Корекція','⚠️ Очікує конвертації','Нерозподілене','Інше'].includes(c));
         expCats.push('Інше');
         const incCats = ['Зарплата','Подарунок','Відсотки','Переказ','Інше'];
 
@@ -235,6 +254,8 @@
         const numpad = document.getElementById('numpad'); [1, 2, 3, 4, 5, 6, 7, 8, 9, 'ID', 0, 'C'].forEach(key => { const btn = document.createElement('button'); btn.className = "h-16 flex items-center justify-center text-2xl font-bold bg-[#1c212b] rounded-2xl active:bg-[#2a2f3a] text-white"; btn.innerHTML = key === 'ID' ? `<span class="text-sm text-sumblue font-bold">FaceID</span>` : key === 'C' ? `<span class="text-xl font-bold text-red-400">C</span>` : key; btn.onclick = () => { if (key === 'C') currentPin = currentPin.slice(0, -1); else if (key === 'ID') return handleFaceID(); else if (currentPin.length < 4) currentPin += key; document.querySelectorAll('.pin-dot').forEach((dot, i) => { if(i < currentPin.length) { dot.classList.add('bg-[#2d63f5]'); dot.classList.remove('bg-sumcard'); } else { dot.classList.remove('bg-[#2d63f5]'); dot.classList.add('bg-sumcard'); } }); if (currentPin.length === 4) { setTimeout(() => { if (currentPin === PIN) { currentPin = ""; loginSuccess(); } else { currentPin = ""; document.querySelectorAll('.pin-dot').forEach(dot => { dot.classList.remove('bg-[#2d63f5]'); dot.classList.add('bg-sumcard'); }); if (navigator.vibrate) navigator.vibrate(200); } }, 100); } }; numpad.appendChild(btn); });
 
         let currentActiveTab = 'overview';
+        let currentSubViewContext = { type: null, name: null, balance: 0 };
+
         function switchTab(tab) {
             currentActiveTab = tab;
             ['overview', 'inbox', 'accounts', 'analytics', 'settings', 'sub-transactions'].forEach(v => { document.getElementById(`view-${v}`).classList.toggle('hidden', v !== tab); });
@@ -257,15 +278,25 @@
         }
 
         function closeSubView() {
-             switchTab('analytics'); // Default back to analytics, could be accounts
+             switchTab(currentSubViewContext.type === 'account' ? 'accounts' : 'analytics'); 
         }
 
         let globalTransactions = []; let globalRules = [];
-        async function syncData() { const btn = document.getElementById('btn-sync'); btn.textContent = "Оновл..."; try { if (!navigator.onLine) return btn.textContent = "Офлайн"; const res = await fetch(WEB_APP_URL); const data = await res.json(); if (data.status === "success") { document.getElementById('balance-display').textContent = fmt(data.balance); document.getElementById('bal-pko').textContent = fmt(data.balances["PKO"] || 0); document.getElementById('bal-mono').textContent = fmt(data.balances["Monobank"] || 0); document.getElementById('bal-cash').textContent = fmt(data.balances["Готівка"] || 0); document.getElementById('bal-jar').textContent = fmt(data.balances["Скарбничка"] || 0); globalTransactions = data.transactions; globalRules = data.rules || []; renderTransactions(); updateAnalytics(); renderRules(); } } catch (err) { } finally { if (navigator.onLine) btn.textContent = "Синхронізувати"; } }
+        async function syncData() { const btn = document.getElementById('btn-sync'); btn.textContent = "Оновл..."; try { if (!navigator.onLine) return btn.textContent = "Офлайн"; const res = await fetch(WEB_APP_URL); const data = await res.json(); if (data.status === "success") { document.getElementById('balance-display').textContent = fmt(data.balance); document.getElementById('bal-pko').textContent = fmt(data.balances["PKO"] || 0); document.getElementById('bal-mono').textContent = fmt(data.balances["Monobank"] || 0); document.getElementById('bal-cash').textContent = fmt(data.balances["Готівка"] || 0); document.getElementById('bal-jar').textContent = fmt(data.balances["Скарбничка"] || 0); globalTransactions = data.transactions; globalRules = data.rules || []; renderTransactions(); updateAnalytics(); renderRules(); if(currentActiveTab === 'sub-transactions') { if(currentSubViewContext.type === 'account') openAccountDetails(currentSubViewContext.name); else openCategoryDetails(currentSubViewContext.name, currentSubViewContext.balance); } } } catch (err) { } finally { if (navigator.onLine) btn.textContent = "Синхронізувати"; } }
         document.getElementById('btn-sync').addEventListener('click', syncData);
 
         function parseTxDate(dateStr) { if (!dateStr) return new Date(); if (dateStr.includes('T')) return new Date(dateStr); const p = dateStr.split(' '); if (p.length > 0 && p[0].includes('.')) { const [d, m] = p[0].split('.'); return new Date(new Date().getFullYear(), parseInt(m) - 1, parseInt(d)); } return new Date(); }
         function formatRelativeDate(dateStr) { const d = parseTxDate(dateStr); const today = new Date(); const yest = new Date(); yest.setDate(today.getDate() - 1); if (d.toDateString() === today.toDateString()) return 'Сьогодні'; if (d.toDateString() === yest.toDateString()) return 'Вчора'; return d.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' }); }
+
+        function createTxHTML(tx, isInboxList) {
+            const isExp = tx.type === 'Expense'; const isTransfer = tx.type === 'Transfer';
+            const color = isTransfer ? 'text-[#2d63f5]' : (isExp ? 'text-white' : 'text-[#10b981]');
+            const sign = isTransfer ? '' : (isExp ? '-' : '+');
+            const catName = isTransfer ? 'Переказ' : tx.category;
+            const accName = isTransfer ? `${tx.accountFrom} → ${tx.accountTo}` : (tx.accountFrom || tx.accountTo || 'Гаманець');
+            const descHtml = tx.description ? `<span class="text-xs text-[#7a8294] truncate max-w-[100px] inline-block align-bottom ml-2">• ${tx.description}</span>` : '';
+            return `<div class="bg-[#151923] rounded-[20px] p-4 flex justify-between items-center mb-2 active:bg-[#1c212c] transition-colors cursor-pointer ${isInboxList ? 'border border-[#f5a623]/30' : ''}" onclick="openTxModal('${tx.id}')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-[#1c212b] flex items-center justify-center text-xl border border-[#2a2f3a]">${getIcon(catName)}</div><div><p class="font-semibold text-white text-sm leading-tight">${catName}${descHtml}</p><p class="text-xs font-medium text-[#7a8294] mt-0.5">${accName}</p></div></div><p class="font-bold text-base ${color}">${sign}${fmt(tx.amount)}</p></div>`;
+        }
 
         function renderTransactions() {
             try {
@@ -277,18 +308,10 @@
                     if (txList.length === 0) { if(!isInboxList) cont.innerHTML = `<div class="p-6 text-center text-sumtext text-sm font-medium border border-dashed border-[#2a2f3a] rounded-2xl">Немає транзакцій.</div>`; return; }
                     txList.sort((a,b) => parseTxDate(b.date) - parseTxDate(a.date));
                     let html = ''; let lastDate = null;
-                    
                     txList.forEach(tx => {
                         const txDateStr = formatRelativeDate(tx.date);
                         if (txDateStr !== lastDate) { html += `<div class="text-xs font-semibold text-[#7a8294] mb-2 mt-4 ml-1">${txDateStr}</div>`; lastDate = txDateStr; }
-                        const isExp = tx.type === 'Expense'; const isTransfer = tx.type === 'Transfer';
-                        const color = isTransfer ? 'text-[#2d63f5]' : (isExp ? 'text-white' : 'text-[#10b981]');
-                        const sign = isTransfer ? '' : (isExp ? '-' : '+');
-                        const catName = isTransfer ? 'Переказ' : tx.category;
-                        const accName = isTransfer ? `${tx.accountFrom} → ${tx.accountTo}` : (tx.accountFrom || tx.accountTo || 'Гаманець');
-                        const descHtml = tx.description ? `<span class="text-xs text-[#7a8294] truncate max-w-[100px] inline-block align-bottom ml-2">• ${tx.description}</span>` : '';
-
-                        html += `<div class="bg-[#151923] rounded-[20px] p-4 flex justify-between items-center mb-2 active:bg-[#1c212c] transition-colors cursor-pointer ${isInboxList ? 'border border-[#f5a623]/30' : ''}" onclick="openTxModal('${tx.id}')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-[#1c212b] flex items-center justify-center text-xl border border-[#2a2f3a]">${getIcon(catName)}</div><div><p class="font-semibold text-white text-sm leading-tight">${catName}${descHtml}</p><p class="text-xs font-medium text-[#7a8294] mt-0.5">${accName}</p></div></div><p class="font-bold text-base ${color}">${sign}${fmt(tx.amount)}</p></div>`;
+                        html += createTxHTML(tx, isInboxList);
                     });
                     cont.innerHTML = html;
                 };
@@ -302,25 +325,17 @@
         function renderSubTransactions(txList, title, totalAmount) {
             switchTab('sub-transactions');
             document.getElementById('sub-header-title').textContent = title;
-            document.getElementById('sub-view-lbl').textContent = title;
+            document.getElementById('sub-view-lbl').textContent = currentSubViewContext.type === 'account' ? 'Баланс' : 'Витрати';
             document.getElementById('sub-view-balance').textContent = fmt(totalAmount);
             
             const cont = document.getElementById('sub-transactions-container');
-            if (txList.length === 0) { cont.innerHTML = `<div class="p-6 text-center text-sumtext text-sm font-medium border border-dashed border-[#2a2f3a] rounded-2xl">Немає транзакцій.</div>`; return; }
+            if (txList.length === 0) { cont.innerHTML = `<div class="p-6 text-center text-sumtext text-sm font-medium border border-dashed border-[#2a2f3a] rounded-2xl mt-4">Немає транзакцій.</div>`; return; }
             txList.sort((a,b) => parseTxDate(b.date) - parseTxDate(a.date));
             let html = ''; let lastDate = null;
-            
             txList.forEach(tx => {
                 const txDateStr = formatRelativeDate(tx.date);
                 if (txDateStr !== lastDate) { html += `<div class="text-xs font-semibold text-[#7a8294] mb-2 mt-4 ml-1">${txDateStr}</div>`; lastDate = txDateStr; }
-                const isExp = tx.type === 'Expense'; const isTransfer = tx.type === 'Transfer';
-                const color = isTransfer ? 'text-[#2d63f5]' : (isExp ? 'text-white' : 'text-[#10b981]');
-                const sign = isTransfer ? '' : (isExp ? '-' : '+');
-                const catName = isTransfer ? 'Переказ' : tx.category;
-                const accName = isTransfer ? `${tx.accountFrom} → ${tx.accountTo}` : (tx.accountFrom || tx.accountTo || 'Гаманець');
-                const descHtml = tx.description ? `<span class="text-xs text-[#7a8294] truncate max-w-[100px] inline-block align-bottom ml-2">• ${tx.description}</span>` : '';
-
-                html += `<div class="bg-[#151923] rounded-[20px] p-4 flex justify-between items-center mb-2 active:bg-[#1c212c] transition-colors cursor-pointer" onclick="openTxModal('${tx.id}')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-[#1c212b] flex items-center justify-center text-xl border border-[#2a2f3a]">${getIcon(catName)}</div><div><p class="font-semibold text-white text-sm leading-tight">${catName}${descHtml}</p><p class="text-xs font-medium text-[#7a8294] mt-0.5">${accName}</p></div></div><p class="font-bold text-base ${color}">${sign}${fmt(tx.amount)}</p></div>`;
+                html += createTxHTML(tx, false);
             });
             cont.innerHTML = html;
         }
@@ -328,19 +343,51 @@
         function openCategoryDetails(categoryName, totalSum) {
             const r = getPeriodRange();
             let expenses = globalTransactions.filter(tx => tx.type === 'Expense' && parseTxDate(tx.date) >= r.start && parseTxDate(tx.date) <= r.end && tx.category === categoryName);
+            currentSubViewContext = { type: 'category', name: categoryName, balance: totalSum };
+            document.getElementById('btn-edit-balance').classList.add('hidden');
+            document.getElementById('sub-header-placeholder').classList.remove('hidden');
             renderSubTransactions(expenses, categoryName, totalSum);
-            document.getElementById('sub-header').querySelector('button').onclick = () => switchTab('analytics');
         }
 
         function openAccountDetails(accountName) {
             let txs = globalTransactions.filter(tx => tx.accountFrom === accountName || tx.accountTo === accountName);
             let balText = document.getElementById(`bal-${accountName === 'Monobank' ? 'mono' : (accountName === 'Готівка' ? 'cash' : (accountName === 'Скарбничка' ? 'jar' : 'pko'))}`).textContent;
-            renderSubTransactions(txs, accountName, parseFloat(balText));
-            document.getElementById('sub-header').querySelector('button').onclick = () => switchTab('accounts');
+            let balNum = parseFloat(balText);
+            currentSubViewContext = { type: 'account', name: accountName, balance: balNum };
+            document.getElementById('btn-edit-balance').classList.remove('hidden');
+            document.getElementById('sub-header-placeholder').classList.add('hidden');
+            renderSubTransactions(txs, accountName, balNum);
         }
 
+        function openBalanceModal() {
+            if (currentSubViewContext.type !== 'account') return;
+            document.getElementById('balance-input').value = currentSubViewContext.balance;
+            document.getElementById('balance-modal').classList.remove('hidden');
+        }
 
-        // Rules Admin
+        async function saveNewBalance() {
+            const btn = document.getElementById('btn-save-balance');
+            const newBal = parseFloat(document.getElementById('balance-input').value);
+            if (isNaN(newBal)) return alert("Введіть суму");
+            const diff = newBal - currentSubViewContext.balance;
+            if (Math.abs(diff) < 0.01) { document.getElementById('balance-modal').classList.add('hidden'); return; }
+            
+            btn.disabled = true; btn.innerText = "Збереження...";
+            const p = {
+                source: "pwa", type: diff > 0 ? 'Income' : 'Expense', date: new Date().toISOString(), amount: Math.abs(diff),
+                accountFrom: diff < 0 ? currentSubViewContext.name : '', accountTo: diff > 0 ? currentSubViewContext.name : '',
+                category: 'Корекція', description: 'Корекція балансу'
+            };
+            
+            if (!navigator.onLine) {
+                let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; q.push(p); localStorage.setItem('offlineTxQueue', JSON.stringify(q));
+                document.getElementById('balance-modal').classList.add('hidden'); btn.disabled = false; btn.innerText = "Зберегти"; return syncData();
+            }
+            try { await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(p) }); document.getElementById('balance-modal').classList.add('hidden'); await syncData(); } 
+            catch(e) { alert("Помилка мережі"); } finally { btn.disabled = false; btn.innerText = "Зберегти"; }
+        }
+
+        // Rules Adim
         function renderRules() {
             const cont = document.getElementById('rules-container'); const catSelect = document.getElementById('rule-category');
             catSelect.innerHTML = expCats.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -405,7 +452,7 @@
             lastChartTotal = activeSum; resetChartCenter();
             
             const ctx = document.getElementById('analytics-chart'); if (chartInstance) chartInstance.destroy(); 
-            if (data.length === 0) { chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Немає'], datasets: [{ data: [1], backgroundColor: ['#1e293b'], borderWidth: 0 }] }, options: { cutout: '75%', plugins: { legend: { display: false }, tooltip: { enabled: false } } } }); } 
+            if (data.length === 0) { chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: ['Немає'], datasets: [{ data: [1], backgroundColor: ['#1e293b'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } } } }); } 
             else { 
                 chartInstance = new Chart(ctx, { 
                     type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors, borderWidth: 0, spacing: 8 }] }, 
@@ -427,9 +474,10 @@
             const cont = document.getElementById('analytics-categories'); cont.innerHTML = ''; 
             Object.entries(totals).sort((a,b) => b[1]-a[1]).forEach(([c, s]) => { 
                 const isE = excludedCats.has(c); const color = getCatColor(c); const pct = (!isE && activeSum > 0) ? ((s / activeSum) * 100) : 0; 
-                cont.innerHTML += `<div class="bg-[#151923] p-4 rounded-[20px] cursor-pointer active:bg-[#1c212c] transition-colors mb-2 ${isE ? 'opacity-40' : ''}" onclick="openCategoryDetails('${c}', ${s})"><div class="flex justify-between items-center mb-2"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-[#1c212b] border border-[#2a2f3a] flex items-center justify-center text-xl">${getIcon(c)}</div><span class="font-semibold text-white text-sm">${c}</span></div><div class="text-right"><div class="text-sm font-bold text-white">${fmt(s)}</div>${!isE ? `<div class="text-[11px] font-semibold text-[#7a8294] mt-0.5">${pct.toFixed(1)}%</div>` : ''}</div></div>${!isE ? `<div class="w-full bg-[#1c212b] rounded-full h-[6px] mt-1"><div class="h-[6px] rounded-full" style="width: ${pct}\%; background-color:${color}"></div></div>` : ''}</div>`;
+                cont.innerHTML += `<div class="bg-[#151923] p-4 rounded-[20px] mb-2 ${isE ? 'opacity-40' : ''}"><div class="flex justify-between items-center mb-2"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-[#1c212b] border border-[#2a2f3a] flex items-center justify-center text-xl cursor-pointer" onclick="toggleCat('${c}', event)">${getIcon(c)}</div><div class="cursor-pointer" onclick="openCategoryDetails('${c}', ${s})"><span class="font-semibold text-white text-sm">${c}</span></div></div><div class="text-right cursor-pointer" onclick="openCategoryDetails('${c}', ${s})"><div class="text-sm font-bold text-white">${fmt(s)}</div>${!isE ? `<div class="text-[11px] font-semibold text-[#7a8294] mt-0.5">${pct.toFixed(1)}%</div>` : ''}</div></div>${!isE ? `<div class="w-full bg-[#1c212b] rounded-full h-[6px] mt-1 cursor-pointer" onclick="openCategoryDetails('${c}',${s})"><div class="h-[6px] rounded-full" style="width: ${pct}\%; background-color:${color}"></div></div>` : ''}</div>`;
             }); 
         }
+        function toggleCat(cat, evt) { if(evt) evt.stopPropagation(); excludedCats.has(cat) ? excludedCats.delete(cat) : excludedCats.add(cat); updateAnalytics(); }
         async function processOfflineQueue() { let q = JSON.parse(localStorage.getItem('offlineTxQueue')) || []; if (q.length === 0) return; let rem = []; for (let i of q) { try { if ((await (await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(i) })).json()).status !== "success") rem.push(i); } catch { rem.push(i); break; } } localStorage.setItem('offlineTxQueue', JSON.stringify(rem)); if (rem.length < q.length) syncData(); } window.addEventListener('online', processOfflineQueue);
     </script>
 </body>
