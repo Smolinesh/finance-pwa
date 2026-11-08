@@ -576,7 +576,7 @@
             const btnPrev = document.getElementById('btn-period-prev'); const btnNext = document.getElementById('btn-period-next');
             const noArrows = (actPeriod === 'all' || actPeriod === 'custom'); btnPrev.style.opacity = noArrows ? '0.3' : '1'; btnNext.style.opacity = noArrows ? '0.3' : '1';
 
-            let expenses = globalTransactions.filter(tx => tx.type === 'Expense' && parseTxDate(tx.date) >= r.start && parseTxDate(tx.date) <= r.end);
+            let expenses = globalTransactions.filter(tx => tx.type === 'Expense' && tx.category !== 'Корекція' && tx.category !== 'Корекція балансу' && parseTxDate(tx.date) >= r.start && parseTxDate(tx.date) <= r.end);
             const totals = {}; expenses.forEach(tx => { const c = tx.category || 'Інше'; totals[c] = (totals[c] || 0) + parseFloat(tx.amount); getCatColor(c); });
             const labels = []; const data = []; const bgColors = []; let activeSum = 0;
             Object.keys(totals).forEach(c => { if (!excludedCats.has(c)) activeSum += totals[c]; });
